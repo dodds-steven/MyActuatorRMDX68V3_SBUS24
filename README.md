@@ -43,3 +43,4 @@ Configure motor limits in main.cpp (e.g., MOTOR1_MIN_POS, MOTOR2_MAX_POS, etc).
    git clone https://github.com/Eebel/MyActuatorRMDX68V3_SBUS24.git
 
    
+This project is ongoing for the moment. https://www.facebook.com/share/g/15HHf4JXkN/ for inputs on the project
