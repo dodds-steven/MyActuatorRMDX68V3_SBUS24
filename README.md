@@ -31,8 +31,15 @@ This repository contains an Arduino-based motor control system for a droid robot
   - Custom `MyActuatorRMDX6V3.h` and `RS485Comm.h` 
 - **Teensyduino**: Add-on for Teensy boards in Arduino IDE.
 
+##Acknowledgments
+  - Built with the Arduino community and Teensy 4.1.
+  - Inspired by droid builders and open-source robotics.
+  - Special thanks to xAI's Grok for code assistance.
+  - 
 ## Installation
 Configure motor limits in main.cpp (e.g., MOTOR1_MIN_POS, MOTOR2_MAX_POS, etc).
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/droid-control.git
+   git clone https://github.com/Eebel/MyActuatorRMDX68V3_SBUS24.git
+
+   
