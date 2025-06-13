@@ -35,6 +35,7 @@ public:
     // Control Commands
     bool MotorShutdown(uint8_t motorID);
     bool MotorPause(uint8_t motorID); // 0x81
+    bool MotorInit(uint8_t motorID); // 0x76
     bool BrakeRelease(uint8_t motorID);
     bool AbsolutePositionClosedLoopControl(uint8_t motorID, int32_t positionUnits, uint16_t maxSpeed);
     bool IncrementalPositionClosedLoopControl(uint8_t motorID, float positionDeg, uint16_t maxSpeed);

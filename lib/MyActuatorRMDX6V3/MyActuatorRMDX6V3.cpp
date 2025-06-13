@@ -1,6 +1,6 @@
 #include "MyActuatorRMDX6V3.h"
 
-#define verboseDebug false
+#define verboseDebug true
 #define GEAR_RATIO 8.0
 #define ENCODER_COUNTS_PER_REV 16384
 #define DEGREES_PER_COUNT (360.0 / ENCODER_COUNTS_PER_REV / GEAR_RATIO) // ≈ 0.002746582°/count
@@ -181,15 +181,12 @@ bool MyActuatorRMDX6V3::processFeedback(uint8_t cmd, uint8_t *packet) {
             _lastFeedback.active = true;
             break;
         }
-        case 0x80: case 0x77: case 0x81: // No data
+        case 0x80: case 0x77: case 0x81: case 0x76: // No data
         {
             if (verboseDebug) {
                 Serial.printf("0x%02X Raw: No data\n", cmd);
             }
             Serial.printf("0x%02X Feedback: No data\n", cmd);
-            if (cmd == 0x80 || cmd == 0x81) {
-                _lastFeedback.active = false;
-            }
             break;
         }
         default:
@@ -225,6 +222,23 @@ bool MyActuatorRMDX6V3::MotorShutdown(uint8_t motorID) {
 
 bool MyActuatorRMDX6V3::MotorPause(uint8_t motorID) {
     uint8_t data[8] = {0x81, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    if (verboseDebug) {
+        Serial.print("Sent Packet: ");
+        for (int i = 0; i < 8; i++) {
+            Serial.printf("%02X ", data[i]);
+        }
+        Serial.println();
+    }
+    uint8_t response[13];
+    uint8_t responseLen = 0;
+    uint8_t command = 0;
+    if (!_comm.sendCommand(motorID, data, 8)) return false;
+    if (!_comm.readFeedback(response, responseLen, command)) return false;
+    return processFeedback(command, response);
+}
+
+bool MyActuatorRMDX6V3::MotorInit(uint8_t motorID) {
+    uint8_t data[8] = {0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     if (verboseDebug) {
         Serial.print("Sent Packet: ");
         for (int i = 0; i < 8; i++) {

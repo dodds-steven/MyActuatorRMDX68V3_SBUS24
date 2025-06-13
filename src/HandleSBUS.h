@@ -17,7 +17,7 @@
  * - SBUS_MIN, SBUS_MAX: Channel value range (default 172, 1811).
  * - SBUS_CENTER: Center value (default 992).
  * - SBUS_DEADZONE: Normalization deadzone (default 0.05).
- * - VERBOSE_DEBUG: Enable/disable debug logs (default 1, set to 0 for production).
+ * - DEBUG_FEEDBACK: Enable/disable debug logs (default false, set to true for development).
  * 
  * Usage:
  * Include in main.cpp, instantiate SBUSHandler, call begin(), and poll readChannels() in loop().
@@ -31,7 +31,7 @@
  #include "SBUS.h"
  
  // Configuration constants
- #define VERBOSE_DEBUG 1           // Enable debug logging (1) or disable (0)
+ #define DEBUG_FEEDBACK false       // Enable debug logging (true) or disable (false)
  #define SBUS_RX_PIN 0             // Serial1 RX pin on Teensy 4.1
  #define SBUS_TX_PIN 1             // Serial1 TX pin on Teensy 4.1
  #define SBUS_BAUD 100000          // SBUS baud rate
@@ -60,7 +60,7 @@
  
  public:
    // Constructor with optional verbose setting
-   SBUSHandler(bool verbose = VERBOSE_DEBUG);
+   SBUSHandler(bool verbose = DEBUG_FEEDBACK);
    
    // Initialize Serial1 and SBUS library
    void begin();
