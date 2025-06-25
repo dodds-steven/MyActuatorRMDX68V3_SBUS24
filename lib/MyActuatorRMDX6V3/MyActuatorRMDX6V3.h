@@ -40,6 +40,9 @@ public:
     bool AbsolutePositionClosedLoopControl(uint8_t motorID, int32_t positionUnits, uint16_t maxSpeed);
     bool IncrementalPositionClosedLoopControl(uint8_t motorID, float positionDeg, uint16_t maxSpeed);
     bool TorqueClosedLoopControl(uint8_t motorID, int16_t torque);
+    // New commands added for 0x64 and 0x76
+    bool SetCurrentPositionAsZero(uint8_t motorID); // 0x64: Set current multi-turn position as zero in ROM
+    bool SystemReset(uint8_t motorID); // 0x76: Reset motor system (replaces MotorInit for clarity)
 
     // Status Commands
     bool ReadSingleTurnEncoderPosition(uint8_t motorID); // 0x60

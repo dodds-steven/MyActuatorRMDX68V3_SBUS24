@@ -1,0 +1,94 @@
+//Rename this to main.cpp and run with the motors in the home position.
+//You will have to temporarily rename the real main.cpp file to something else like main.cpp.bak
+//This code will reset all motors to zero position and print the shaft angles before and after resetting
+
+#include <Arduino.h>
+#include "MyActuatorRMDX6V3.h"
+
+// Define RS-485 serial port and direction pin
+#define RS485_SERIAL Serial4
+#define DIR_PIN 41 // Direction pin for RS-485 transceiver DE/RE
+#define BAUD_RATE 115200 // Baud rate for RS-485 communication
+
+// Create motor controller instance using Serial4 and direction pin
+MyActuatorRMDX6V3 motor(RS485_SERIAL, DIR_PIN);
+
+// Array of motor IDs
+const uint8_t motorIDs[] = {0x01, 0x02, 0x03, 0x04};
+const uint8_t numMotors = 4;
+
+void setup() {
+    // Initialize USB serial for debugging output
+    Serial.begin(115200);
+    while (!Serial); // Wait for Serial Monitor to connect
+    Serial.println("Starting RMD Motor Control Program");
+
+    // Initialize RS-485 communication
+    motor.begin(BAUD_RATE);
+    Serial.println("RS-485 initialized");
+
+    // Step 1: Read and print initial shaft angles for all motors
+    Serial.println("\n--- Initial Shaft Angles ---");
+    for (uint8_t i = 0; i < numMotors; i++) {
+        uint8_t motorID = motorIDs[i];
+        // Send command 0x92 to read multi-turn angle
+        if (motor.ReadMultiTurnAngle(motorID)) {
+            // Get feedback to retrieve shaft angle
+            MyActuatorRMDX6V3::Feedback feedback = motor.getFeedback();
+            // Print angle in degrees (shaftAngle is in 0.01° units)
+            Serial.printf("Motor ID 0x%02X: Shaft Angle = %.2f degrees\n", 
+                          motorID, feedback.shaftAngle / 100.0);
+        } else {
+            // Print error if command fails
+            Serial.printf("Motor ID 0x%02X: Failed to read shaft angle\n", motorID);
+        }
+        delay(10); // Small delay to avoid overwhelming the bus
+    }
+
+    // Step 2: Set zero position and reset each motor
+    Serial.println("\n--- Setting Zero Position and Resetting Motors ---");
+    for (uint8_t i = 0; i < numMotors; i++) {
+        uint8_t motorID = motorIDs[i];
+        // Send command 0x64 to set current position as zero
+        if (motor.SetCurrentPositionAsZero(motorID)) {
+            Serial.printf("Motor ID 0x%02X: Zero position set\n", motorID);
+        } else {
+            Serial.printf("Motor ID 0x%02X: Failed to set zero position\n", motorID);
+        }
+        // Wait 100ms as specified
+        delay(100);
+        // Send command 0x76 to reset the motor
+        if (motor.SystemReset(motorID)) {
+            Serial.printf("Motor ID 0x%02X: System reset\n", motorID);
+        } else {
+            Serial.printf("Motor ID 0x%02X: Failed to reset system\n", motorID);
+        }
+        delay(100); // Small delay to avoid overwhelming the bus
+    }
+
+    // Step 3: Wait 500ms before reading final shaft angles
+    Serial.println("\nWaiting 500ms...");
+    delay(500);
+
+    // Step 4: Read and print final shaft angles for all motors
+    Serial.println("\n--- Final Shaft Angles After Zeroing and Reset ---");
+    for (uint8_t i = 0; i < numMotors; i++) {
+        uint8_t motorID = motorIDs[i];
+        // Send command 0x92 to read multi-turn angle
+        if (motor.ReadMultiTurnAngle(motorID)) {
+            // Get feedback to retrieve shaft angle
+            MyActuatorRMDX6V3::Feedback feedback = motor.getFeedback();
+            // Print angle in degrees (shaftAngle is in 0.01° units)
+            Serial.printf("Motor ID 0x%02X: Shaft Angle = %.2f degrees\n", 
+                          motorID, feedback.shaftAngle / 100.0);
+        } else {
+            // Print error if command fails
+            Serial.printf("Motor ID 0x%02X: Failed to read shaft angle\n", motorID);
+        }
+        delay(10); // Small delay to avoid overwhelming the bus
+    }
+}
+
+void loop() {
+    // No continuous operation required; program runs once
+}

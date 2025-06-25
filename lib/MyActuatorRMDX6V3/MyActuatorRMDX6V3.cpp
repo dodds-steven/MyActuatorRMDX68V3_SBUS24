@@ -1,6 +1,6 @@
 #include "MyActuatorRMDX6V3.h"
 
-#define verboseDebug true
+#define verboseDebug false
 #define GEAR_RATIO 8.0
 #define ENCODER_COUNTS_PER_REV 16384
 #define DEGREES_PER_COUNT (360.0 / ENCODER_COUNTS_PER_REV / GEAR_RATIO) // ≈ 0.002746582°/count
@@ -79,6 +79,18 @@ bool MyActuatorRMDX6V3::processFeedback(uint8_t cmd, uint8_t *packet) {
             break;
         }
         case 0x62: // Multi-Turn Encoder Zero Offset
+        {
+            int32_t offset = (int32_t)(packet[7] | (packet[8] << 8) | (packet[9] << 16) | (packet[10] << 24)); // DATA[4-7]
+            _lastFeedback.encoderOff = offset;
+            if (verboseDebug) {
+                Serial.printf("0x%02X Raw: EncoderOff=%d ticks (%.2f degrees)\n",
+                             cmd, offset, offset * DEGREES_PER_COUNT);
+            }
+            Serial.printf("0x%02X Feedback: EncoderOff=%d ticks (%.2f degrees)\n",
+                         cmd, offset, offset * DEGREES_PER_COUNT);
+            break;
+        }
+        case 0x64: // Set Current Position as Zero (updated to parse encoderOffset)
         {
             int32_t offset = (int32_t)(packet[7] | (packet[8] << 8) | (packet[9] << 16) | (packet[10] << 24)); // DATA[4-7]
             _lastFeedback.encoderOff = offset;
@@ -181,12 +193,20 @@ bool MyActuatorRMDX6V3::processFeedback(uint8_t cmd, uint8_t *packet) {
             _lastFeedback.active = true;
             break;
         }
-        case 0x80: case 0x77: case 0x81: case 0x76: // No data
+        case 0x80: case 0x77: case 0x81: // No data
         {
             if (verboseDebug) {
                 Serial.printf("0x%02X Raw: No data\n", cmd);
             }
             Serial.printf("0x%02X Feedback: No data\n", cmd);
+            break;
+        }
+        case 0x76: // System Reset (handled separately in SystemReset, but included for completeness)
+        {
+            if (verboseDebug) {
+                Serial.printf("0x%02X Raw: No data (system reset)\n", cmd);
+            }
+            Serial.printf("0x%02X Feedback: No data (system reset)\n", cmd);
             break;
         }
         default:
@@ -222,23 +242,6 @@ bool MyActuatorRMDX6V3::MotorShutdown(uint8_t motorID) {
 
 bool MyActuatorRMDX6V3::MotorPause(uint8_t motorID) {
     uint8_t data[8] = {0x81, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-    if (verboseDebug) {
-        Serial.print("Sent Packet: ");
-        for (int i = 0; i < 8; i++) {
-            Serial.printf("%02X ", data[i]);
-        }
-        Serial.println();
-    }
-    uint8_t response[13];
-    uint8_t responseLen = 0;
-    uint8_t command = 0;
-    if (!_comm.sendCommand(motorID, data, 8)) return false;
-    if (!_comm.readFeedback(response, responseLen, command)) return false;
-    return processFeedback(command, response);
-}
-
-bool MyActuatorRMDX6V3::MotorInit(uint8_t motorID) {
-    uint8_t data[8] = {0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     if (verboseDebug) {
         Serial.print("Sent Packet: ");
         for (int i = 0; i < 8; i++) {
@@ -347,6 +350,47 @@ bool MyActuatorRMDX6V3::TorqueClosedLoopControl(uint8_t motorID, int16_t torque)
     return processFeedback(command, response);
 }
 
+bool MyActuatorRMDX6V3::SetCurrentPositionAsZero(uint8_t motorID) {
+    uint8_t data[8] = {0x64, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    if (verboseDebug) {
+        Serial.print("Sent Packet: ");
+        for (int i = 0; i < 8; i++) {
+            Serial.printf("%02X ", data[i]);
+        }
+        Serial.println();
+    }
+    uint8_t response[13];
+    uint8_t responseLen = 0;
+    uint8_t command = 0;
+    if (!_comm.sendCommand(motorID, data, 8)) return false;
+    if (!_comm.readFeedback(response, responseLen, command)) return false;
+    return processFeedback(command, response);
+}
+
+bool MyActuatorRMDX6V3::SystemReset(uint8_t motorID) {
+    // Construct data array for command 0x76
+    uint8_t data[8] = {0x76, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+    // Log sent packet if verbose debugging is enabled
+    if (verboseDebug) {
+        Serial.print("Sent Packet: ");
+        for (int i = 0; i < 8; i++) {
+            Serial.printf("%02X ", data[i]);
+        }
+        Serial.println();
+    }
+    // Send command via RS485Comm
+    // Skip readFeedback since system reset may prevent a response
+    if (!_comm.sendCommand(motorID, data, 8)) {
+        return false;
+    }
+    // Assume success after sending, as per protocol behavior
+    if (verboseDebug) {
+        Serial.println("0x76 Raw: No data expected (system reset)");
+    }
+    Serial.println("0x76 Feedback: No data expected (system reset)");
+    return true;
+}
+
 // Status Commands
 bool MyActuatorRMDX6V3::ReadSingleTurnEncoderPosition(uint8_t motorID) {
     uint8_t data[8] = {0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -433,7 +477,7 @@ bool MyActuatorRMDX6V3::ReadSystemStatus(uint8_t motorID) {
     return processFeedback(command, response);
 }
 
-// PID Commands (unchanged)
+// PID Commands
 bool MyActuatorRMDX6V3::ReadPositionPIDParameters(uint8_t motorID) {
     uint8_t data[8] = {0x30, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
     uint8_t response[13];
