@@ -38,9 +38,9 @@ void MotorModeController::update() {
   if (channelsRead && CONTROL_MODE-1 < SBUS_CHANNELS && STATIC_Y_CHANNEL-1 < SBUS_CHANNELS && STATIC_X_CHANNEL-1 < SBUS_CHANNELS) {
     Serial.print(", CH3=");
     Serial.print(sbusChannels[CONTROL_MODE-1]);
-    Serial.print(", CH10/Y=");
+    Serial.print(", CH2/Y=");
     Serial.print(sbusChannels[STATIC_Y_CHANNEL-1]);
-    Serial.print(", CH11/X=");
+    Serial.print(", CH1/X=");
     Serial.print(sbusChannels[STATIC_X_CHANNEL-1]);
     Serial.print(", CH18=");
     Serial.println(sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1]);
@@ -125,8 +125,8 @@ void MotorModeController::update() {
     if (channelsRead && STATIC_X_CHANNEL-1 < SBUS_CHANNELS && STATIC_Y_CHANNEL-1 < SBUS_CHANNELS &&
         sbusChannels[STATIC_X_CHANNEL-1] >= SBUS_MIN && sbusChannels[STATIC_X_CHANNEL-1] <= SBUS_MAX &&
         sbusChannels[STATIC_Y_CHANNEL-1] >= SBUS_MIN && sbusChannels[STATIC_Y_CHANNEL-1] <= SBUS_MAX) {
-      xNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_X_CHANNEL-1]) * 0.9f; // CH11/X, 90% scale
-      yNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_Y_CHANNEL-1]) * 0.9f; // CH10/Y, 90% scale
+      xNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_X_CHANNEL-1]) * 0.9f; // CH1/X, 90% scale (roll)
+      yNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_Y_CHANNEL-1]) * 0.9f; // CH2/Y, 90% scale (pitch)
     }
     if (channelsRead && FOOTLIFT_HEIGHT_CHANNEL-1 < SBUS_CHANNELS &&
         sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] >= SBUS_MIN && sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] <= SBUS_MAX) {
@@ -201,10 +201,10 @@ void MotorModeController::update() {
 
       int32_t centerPos = (motorController.getMinPos(i) + motorController.getMaxPos(i)) / 2;
       int32_t range = motorController.getMaxPos(i) - motorController.getMinPos(i);
-      float pitchDelta = yNorm; // Forward/aft (CH10/Y)
-      float rollDelta = (i == 0 || i == 2) ? xNorm : -xNorm; // Left/right (CH11/X), opposite for Motor2/Motor4
+      float pitchDelta = -yNorm; // Forward/aft (CH2/Y in STATIC), reversed polarity
+      float rollDelta = (i == 0 || i == 2) ? xNorm : -xNorm; // Left/right (CH1/X in STATIC), opposite for Motor2/Motor4
       newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1))) +
-                        (int32_t)(footLiftNorm * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
+                        (int32_t)((-footLiftNorm) * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
       newPositions[i] = constrain(newPositions[i], motorController.getMinPos(i), motorController.getMaxPos(i));
 
 #if MC_DEBUG_VERBOSE
@@ -269,7 +269,7 @@ void MotorModeController::update() {
       float pitchDelta = (xNorm + xNormLeft) * 0.5f; // Forward/aft (CH1/X + CH5/Y)
       float rollDelta = (i == 0 || i == 2) ? (yNorm + yNormLeft) * 0.5f : -(yNorm + yNormLeft) * 0.5f; // Left/right (CH2/Y + CH6/X)
       newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1))) +
-                        (int32_t)(footLiftNorm * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
+                        (int32_t)((-footLiftNorm) * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
       newPositions[i] = constrain(newPositions[i], motorController.getMinPos(i), motorController.getMaxPos(i));
 
 #if MC_DEBUG_VERBOSE

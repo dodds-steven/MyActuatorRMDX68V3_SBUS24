@@ -34,10 +34,10 @@ const float MOTOR4_MAX = 115.00;  // Motor 4 RobotHigh
 
 // SBUS channel definitions
 #define CONTROL_MODE 3            // CH3 (index 2): Selects operating mode (STATIC, MOBILE, SHUTDOWN)
-#define STATIC_X_CHANNEL 11       // CH11/X (index 10): Controls roll (Motor1/Motor3) in STATIC mode
-#define STATIC_Y_CHANNEL 10       // CH10/Y (index 9): Controls pitch (Motor2/Motor4) in STATIC mode
-#define MOBILE_X_CHANNEL 1        // CH1/X (index 0): Controls roll (Motor1/Motor3) in MOBILE mode
-#define MOBILE_Y_CHANNEL 2        // CH2/Y (index 1): Controls pitch (Motor2/Motor4) in MOBILE mode
+#define STATIC_X_CHANNEL 11      // CH11/X (index 10): Controls roll (Motor1/Motor3) in STATIC mode
+#define STATIC_Y_CHANNEL 10      // CH10/Y (index 9): Controls pitch (Motor2/Motor4) in STATIC mode
+#define MOBILE_X_CHANNEL 10        // CH11/X (index 10): Controls roll (Motor1/Motor3) in MOBILE mode
+#define MOBILE_Y_CHANNEL 11        // CH10/Y (index 9): Controls pitch (Motor2/Motor4) in MOBILE mode
 #define STRAFE_X_CHANNEL 12       // CH12/X (index 11): Controls lateral movement (strafe) in applicable modes
 #define FOOTLIFT_HEIGHT_CHANNEL 18 // CH18 (index 17): Controls footlift height in MOBILE mode
 
