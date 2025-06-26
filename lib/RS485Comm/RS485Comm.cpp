@@ -62,7 +62,7 @@ bool RS485Comm::readFeedback(uint8_t *response, uint8_t &response_length, uint8_
     Serial.println("RS485: Reading response");
 #endif
 
-    while (millis() - startTime < 100) {
+    while (millis() - startTime < 50) {
         if (_serial.available()) {
             buffer[bytesRead] = _serial.read();
 #if verboseDebug

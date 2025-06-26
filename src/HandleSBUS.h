@@ -3,11 +3,11 @@
  * 
  * Preamble:
  * This header defines the SBUSHandler class for non-blocking SBUS data reading on a Teensy 4.1 with FrSky TD-R10 receiver.
- * It interfaces with the bolderflight/SBUS library to parse SBUS packets, delivering validated channel data (X CH11, Y CH10)
- * in the range 172–1811, normalized to -1.0 to 1.0, for motor control (e.g., RMD X6-8 V3). The class ensures high reliability
- * (>99.76% success rate, ~553/555 cycles in 5s), minimal loop lag, and robust error handling. Key features:
+ * It interfaces with the bolderflight/SBUS library to parse SBUS packets, delivering validated channel data (0–23) in the range
+ * 172–1811 for motor control (e.g., RMD X6-8 V3). The class ensures high reliability (>99.76% success rate, ~553/555 cycles in 5s),
+ * minimal loop lag, and robust error handling. Key features:
  * - Polls SBUS every 8.5ms, with a 1.5ms post-read wait for frame alignment.
- * - Validates X, Y channels, trusts library’s failsafe and lostFrame flags.
+ * - Validates all channels, trusts library’s failsafe and lostFrame flags.
  * - Flushes buffer at >40 bytes to prevent overflow, skips reads if <25 bytes.
  * - Centers channels (992) after 5 failed reads.
  * 
@@ -17,11 +17,11 @@
  * - SBUS_MIN, SBUS_MAX: Channel value range (default 172, 1811).
  * - SBUS_CENTER: Center value (default 992).
  * - SBUS_DEADZONE: Normalization deadzone (default 0.05).
- * - DEBUG_FEEDBACK: Enable/disable debug logs (default false, set to true for development).
+ * - DEBUG_FEEDBACK: Enable/disable debug logs (default true, set to false for production).
  * 
  * Usage:
  * Include in main.cpp, instantiate SBUSHandler, call begin(), and poll readChannels() in loop().
- * Outputs xNorm, yNorm for motor control. Adjust parameters for different SBUS receivers or timing needs.
+ * Consumers (e.g., MotorModeController) normalize specific channels as needed.
  */
 
  #ifndef HANDLE_SBUS_H
@@ -31,13 +31,11 @@
  #include "SBUS.h"
  
  // Configuration constants
- #define DEBUG_FEEDBACK false       // Enable debug logging (true) or disable (false)
- #define VERBOSE_DEBUG false            // Verbose debug output (1 for enabled, 0 for disabled)
+ #define DEBUG_FEEDBACK true       // Enable debug logging (true) or disable (false)
+ #define VERBOSE_DEBUG true        // Verbose debug output (1 for enabled, 0 for disabled)
  #define SBUS_RX_PIN 0             // Serial1 RX pin on Teensy 4.1
  #define SBUS_TX_PIN 1             // Serial1 TX pin on Teensy 4.1
  #define SBUS_BAUD 100000          // SBUS baud rate
- #define X_CHANNEL 10              // Channel 11 (index 10) for X-axis
- #define Y_CHANNEL 9               // Channel 10 (index 9) for Y-axis
  #define SBUS_MIN 172              // Minimum valid channel value
  #define SBUS_MAX 1811             // Maximum valid channel value
  #define SBUS_CENTER 992           // Center channel value
@@ -66,8 +64,8 @@
    // Initialize Serial1 and SBUS library
    void begin();
    
-   // Read SBUS channels, output normalized X, Y values
-   bool readChannels(float& xNorm, float& yNorm, uint16_t* channels);
+   // Read SBUS channels, output channel array
+   bool readChannels(uint16_t* channels);
    
    // Normalize SBUS value to -1.0 to 1.0
    float normalizeSbus(uint16_t sbusValue);
@@ -77,3 +75,4 @@
  };
  
  #endif
+ // File: HandleSBUS.h (39 lines)
