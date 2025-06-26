@@ -41,7 +41,9 @@ void MotorModeController::update() {
     Serial.print(", CH10/Y=");
     Serial.print(sbusChannels[STATIC_Y_CHANNEL-1]);
     Serial.print(", CH11/X=");
-    Serial.println(sbusChannels[STATIC_X_CHANNEL-1]);
+    Serial.print(sbusChannels[STATIC_X_CHANNEL-1]);
+    Serial.print(", CH18=");
+    Serial.println(sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1]);
   } else {
     Serial.println(", Invalid channel indices or read failed");
   }
@@ -115,19 +117,27 @@ void MotorModeController::update() {
     return;
   }
 
-  // Process gimbal inputs for STATIC or MOBILE mode
+  // Process gimbal and footlift inputs
   float xNorm = 0.0f, yNorm = 0.0f;
   float xNormLeft = 0.0f, yNormLeft = 0.0f;
+  float footLiftNorm = 0.0f;
   if (currentMode == STATIC) {
     if (channelsRead && STATIC_X_CHANNEL-1 < SBUS_CHANNELS && STATIC_Y_CHANNEL-1 < SBUS_CHANNELS &&
         sbusChannels[STATIC_X_CHANNEL-1] >= SBUS_MIN && sbusChannels[STATIC_X_CHANNEL-1] <= SBUS_MAX &&
         sbusChannels[STATIC_Y_CHANNEL-1] >= SBUS_MIN && sbusChannels[STATIC_Y_CHANNEL-1] <= SBUS_MAX) {
-      xNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_X_CHANNEL-1]); // CH11/X
-      yNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_Y_CHANNEL-1]); // CH10/Y
+      xNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_X_CHANNEL-1]) * 0.9f; // CH11/X, 90% scale
+      yNorm = sbusHandler.normalizeSbus(sbusChannels[STATIC_Y_CHANNEL-1]) * 0.9f; // CH10/Y, 90% scale
+    }
+    if (channelsRead && FOOTLIFT_HEIGHT_CHANNEL-1 < SBUS_CHANNELS &&
+        sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] >= SBUS_MIN && sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] <= SBUS_MAX) {
+      footLiftNorm = sbusHandler.normalizeSbus(sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1]);
     }
 #if MC_DEBUG_VERBOSE
     if (!channelsRead || STATIC_X_CHANNEL-1 >= SBUS_CHANNELS || STATIC_Y_CHANNEL-1 >= SBUS_CHANNELS) {
       Serial.println("SBUS read failed or invalid STATIC channels, using xNorm=0, yNorm=0");
+    }
+    if (!channelsRead || FOOTLIFT_HEIGHT_CHANNEL-1 >= SBUS_CHANNELS) {
+      Serial.println("SBUS read failed or invalid FootLift channel, using footLiftNorm=0");
     }
 #endif
   } else { // MOBILE
@@ -143,12 +153,19 @@ void MotorModeController::update() {
       xNormLeft = sbusHandler.normalizeSbus(sbusChannels[4]); // CH5/Y (roll)
       yNormLeft = sbusHandler.normalizeSbus(sbusChannels[5]); // CH6/X (pitch)
     }
+    if (channelsRead && FOOTLIFT_HEIGHT_CHANNEL-1 < SBUS_CHANNELS &&
+        sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] >= SBUS_MIN && sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] <= SBUS_MAX) {
+      footLiftNorm = sbusHandler.normalizeSbus(sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1]);
+    }
 #if MC_DEBUG_VERBOSE
     if (!channelsRead || MOBILE_X_CHANNEL-1 >= SBUS_CHANNELS || MOBILE_Y_CHANNEL-1 >= SBUS_CHANNELS) {
       Serial.println("SBUS read failed or invalid MOBILE channels, using xNorm=0, yNorm=0");
     }
     if (!channelsRead || 5 >= SBUS_CHANNELS || 4 >= SBUS_CHANNELS) {
       Serial.println("SBUS read failed or invalid Left Gimbal channels, using xNormLeft=0, yNormLeft=0");
+    }
+    if (!channelsRead || FOOTLIFT_HEIGHT_CHANNEL-1 >= SBUS_CHANNELS) {
+      Serial.println("SBUS read failed or invalid FootLift channel, using footLiftNorm=0");
     }
 #endif
   }
@@ -161,7 +178,9 @@ void MotorModeController::update() {
   Serial.print(", xNormLeft=");
   Serial.print(xNormLeft);
   Serial.print(", yNormLeft=");
-  Serial.println(yNormLeft);
+  Serial.print(yNormLeft);
+  Serial.print(", footLiftNorm=");
+  Serial.println(footLiftNorm);
 #endif
 
   // Update motor positions for STATIC mode
@@ -184,7 +203,8 @@ void MotorModeController::update() {
       int32_t range = motorController.getMaxPos(i) - motorController.getMinPos(i);
       float pitchDelta = yNorm; // Forward/aft (CH10/Y)
       float rollDelta = (i == 0 || i == 2) ? xNorm : -xNorm; // Left/right (CH11/X), opposite for Motor2/Motor4
-      newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1)));
+      newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1))) +
+                        (int32_t)(footLiftNorm * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
       newPositions[i] = constrain(newPositions[i], motorController.getMinPos(i), motorController.getMaxPos(i));
 
 #if MC_DEBUG_VERBOSE
@@ -248,7 +268,8 @@ void MotorModeController::update() {
       int32_t range = motorController.getMaxPos(i) - motorController.getMinPos(i);
       float pitchDelta = (xNorm + xNormLeft) * 0.5f; // Forward/aft (CH1/X + CH5/Y)
       float rollDelta = (i == 0 || i == 2) ? (yNorm + yNormLeft) * 0.5f : -(yNorm + yNormLeft) * 0.5f; // Left/right (CH2/Y + CH6/X)
-      newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1)));
+      newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1))) +
+                        (int32_t)(footLiftNorm * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
       newPositions[i] = constrain(newPositions[i], motorController.getMinPos(i), motorController.getMaxPos(i));
 
 #if MC_DEBUG_VERBOSE
@@ -320,4 +341,4 @@ void MotorModeController::setMotorPosition(uint8_t index, int32_t position) {
     motorPositions[index] = position;
   }
 }
-// File: MotorModeController.cpp (208 lines)
+// File: MotorModeController.cpp (215 lines)
