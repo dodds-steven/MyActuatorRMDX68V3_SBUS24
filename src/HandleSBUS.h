@@ -31,8 +31,8 @@
  #include "SBUS.h"
  
  // Configuration constants
- #define DEBUG_FEEDBACK true       // Enable debug logging (true) or disable (false)
- #define VERBOSE_DEBUG true        // Verbose debug output (1 for enabled, 0 for disabled)
+ #define DEBUG_FEEDBACK false       // Enable debug logging (true) or disable (false)
+ #define VERBOSE_DEBUG false        // Verbose debug output (1 for enabled, 0 for disabled)
  #define SBUS_RX_PIN 0             // Serial1 RX pin on Teensy 4.1
  #define SBUS_TX_PIN 1             // Serial1 TX pin on Teensy 4.1
  #define SBUS_BAUD 100000          // SBUS baud rate

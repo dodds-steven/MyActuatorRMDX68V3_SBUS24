@@ -6,7 +6,7 @@
 #include "HandleSBUS.h"
 #include "Definitions.h"
 
-#define MC_DEBUG_VERBOSE true
+#define MC_DEBUG_VERBOSE false
 #define STATIC_THRESHOLD 500 // CH3 threshold for STATIC mode
 #define MOBILE_THRESHOLD 1300 // CH3 threshold for MOBILE mode
 #define DEBOUNCE_INTERVAL 200 // ms, minimum time between mode switches

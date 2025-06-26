@@ -4,7 +4,7 @@
 #include <MyActuatorRMDX6V3.h>
 #include <Definitions.h>
 
-#define MC_DEBUG_VERBOSE true // Ensure debug logs
+
 
 // Global motors array
 MotorConfig motors[NUM_MOTORS];
