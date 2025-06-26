@@ -169,6 +169,8 @@ void MotorModeController::update() {
 #if MC_DEBUG_VERBOSE
     Serial.println("Processing STATIC mode");
 #endif
+    int32_t newPositions[NUM_MOTORS];
+    bool shouldUpdate[NUM_MOTORS] = {false};
     for (uint8_t i = 0; i < NUM_MOTORS; i++) {
       if (!motorController.isCommActive(i) || !motorController.isSafeToMove(i)) {
         continue;
@@ -182,33 +184,40 @@ void MotorModeController::update() {
       int32_t range = motorController.getMaxPos(i) - motorController.getMinPos(i);
       float pitchDelta = yNorm; // Forward/aft (CH10/Y)
       float rollDelta = (i == 0 || i == 2) ? xNorm : -xNorm; // Left/right (CH11/X), opposite for Motor2/Motor4
-      int32_t newPosition = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1)));
-      newPosition = constrain(newPosition, motorController.getMinPos(i), motorController.getMaxPos(i));
+      newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1)));
+      newPositions[i] = constrain(newPositions[i], motorController.getMinPos(i), motorController.getMaxPos(i));
 
 #if MC_DEBUG_VERBOSE
       Serial.print("M");
       Serial.print(i + 1);
       Serial.print(" Calculated position: Pos=");
-      Serial.print(newPosition / 100.0f);
+      Serial.print(newPositions[i] / 100.0f);
       Serial.println("°");
 #endif
 
-      if (newPosition != motorPositions[i]) {
+      if (newPositions[i] != motorPositions[i]) {
+        shouldUpdate[i] = true;
+      }
+    }
+
+    // Apply motor updates
+    for (uint8_t i = 0; i < NUM_MOTORS; i++) {
+      if (shouldUpdate[i]) {
 #if MC_DEBUG_VERBOSE
         Serial.print("M");
         Serial.print(i + 1);
         Serial.print(" Attempting setPosition: Pos=");
-        Serial.print(newPosition / 100.0f);
+        Serial.print(newPositions[i] / 100.0f);
         Serial.println("°");
 #endif
-        if (motorController.setPosition(i, newPosition, 500)) {
-          motorPositions[i] = newPosition;
+        if (motorController.setPosition(i, newPositions[i], 500)) {
+          motorPositions[i] = newPositions[i];
           lastUpdateTime[i] = currentTime;
 #if MC_DEBUG_VERBOSE
           Serial.print("M");
           Serial.print(i + 1);
           Serial.print(" Position set: Pos=");
-          Serial.print(newPosition / 100.0f);
+          Serial.print(newPositions[i] / 100.0f);
           Serial.println("°");
 #endif
         } else {
@@ -224,6 +233,8 @@ void MotorModeController::update() {
 #if MC_DEBUG_VERBOSE
     Serial.println("Processing MOBILE mode");
 #endif
+    int32_t newPositions[NUM_MOTORS];
+    bool shouldUpdate[NUM_MOTORS] = {false};
     for (uint8_t i = 0; i < NUM_MOTORS; i++) {
       if (!motorController.isCommActive(i) || !motorController.isSafeToMove(i)) {
         continue;
@@ -237,33 +248,40 @@ void MotorModeController::update() {
       int32_t range = motorController.getMaxPos(i) - motorController.getMinPos(i);
       float pitchDelta = (xNorm + xNormLeft) * 0.5f; // Forward/aft (CH1/X + CH5/Y)
       float rollDelta = (i == 0 || i == 2) ? (yNorm + yNormLeft) * 0.5f : -(yNorm + yNormLeft) * 0.5f; // Left/right (CH2/Y + CH6/X)
-      int32_t newPosition = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1)));
-      newPosition = constrain(newPosition, motorController.getMinPos(i), motorController.getMaxPos(i));
+      newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1)));
+      newPositions[i] = constrain(newPositions[i], motorController.getMinPos(i), motorController.getMaxPos(i));
 
 #if MC_DEBUG_VERBOSE
       Serial.print("M");
       Serial.print(i + 1);
       Serial.print(" Calculated position: Pos=");
-      Serial.print(newPosition / 100.0f);
+      Serial.print(newPositions[i] / 100.0f);
       Serial.println("°");
 #endif
 
-      if (newPosition != motorPositions[i]) {
+      if (newPositions[i] != motorPositions[i]) {
+        shouldUpdate[i] = true;
+      }
+    }
+
+    // Apply motor updates
+    for (uint8_t i = 0; i < NUM_MOTORS; i++) {
+      if (shouldUpdate[i]) {
 #if MC_DEBUG_VERBOSE
         Serial.print("M");
         Serial.print(i + 1);
         Serial.print(" Attempting setPosition: Pos=");
-        Serial.print(newPosition / 100.0f);
+        Serial.print(newPositions[i] / 100.0f);
         Serial.println("°");
 #endif
-        if (motorController.setPosition(i, newPosition, 500)) {
-          motorPositions[i] = newPosition;
+        if (motorController.setPosition(i, newPositions[i], 500)) {
+          motorPositions[i] = newPositions[i];
           lastUpdateTime[i] = currentTime;
 #if MC_DEBUG_VERBOSE
           Serial.print("M");
           Serial.print(i + 1);
           Serial.print(" Position set: Pos=");
-          Serial.print(newPosition / 100.0f);
+          Serial.print(newPositions[i] / 100.0f);
           Serial.println("°");
 #endif
         } else {
@@ -302,4 +320,4 @@ void MotorModeController::setMotorPosition(uint8_t index, int32_t position) {
     motorPositions[index] = position;
   }
 }
-// File: MotorModeController.cpp (184 lines)
+// File: MotorModeController.cpp (208 lines)
