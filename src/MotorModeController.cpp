@@ -165,9 +165,9 @@ void MotorModeController::update() {
       }
 
       int32_t centerPos = (motorController.getMinPos(i) + motorController.getMaxPos(i)) / 2;
-      float delta = (i == 0 || i == 2) ? xNorm : yNorm; // Roll (X) or Pitch (Y)
+      float delta = yNorm; // Use yNorm for all motors (pitch control)
       int32_t range = motorController.getMaxPos(i) - motorController.getMinPos(i);
-      int32_t newPosition = centerPos + (int32_t)(delta * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
+      int32_t newPosition = centerPos + (int32_t)(delta * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1)));
       newPosition = constrain(newPosition, motorController.getMinPos(i), motorController.getMaxPos(i));
 
 #if MC_DEBUG_VERBOSE
