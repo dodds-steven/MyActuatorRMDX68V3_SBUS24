@@ -7,7 +7,7 @@ const uint8_t EncoderZeroing::numMotors = 4;
 // Constructor
 EncoderZeroing::EncoderZeroing(MyActuatorRMDX6V3* motors[], uint8_t jumperPin)
     : motors(motors), jumperPin(jumperPin), hasRun(false) {
-    pinMode(jumperPin, INPUT); // Set jumper pin as input
+    pinMode(jumperPin, INPUT_PULLDOWN); // Set jumper pin as input
 }
 
 // Zeroes encoders if jumper is LOW and hasn't run
