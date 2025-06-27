@@ -10,7 +10,7 @@ EncoderZeroing::EncoderZeroing(MyActuatorRMDX6V3* motors[], uint8_t jumperPin)
     pinMode(jumperPin, INPUT); // Set jumper pin as input
 }
 
-// Zeroes encoders if jumper is HIGH and routine hasn't run
+// Zeroes encoders if jumper is HIGH and hasn't run
 bool EncoderZeroing::zeroEncoders() {
     // Check if routine has already run
     if (hasRun) {
@@ -67,8 +67,14 @@ bool EncoderZeroing::zeroEncoders() {
     Serial.println("\nWaiting 500ms...");
     delay(500);
 
+    //End Serial4 becasue motors will not respond after reset
+    Serial4.end();
+    // Reinitialize Serial4 for communication after reset
+    Serial4.begin(RS485_BAUD_RATE);// Reinitialize RS485 port with defined baud rate
+
     // Step 4: Read and print final shaft angles for all motors
     Serial.println("\n--- Final Shaft Angles After Zeroing and Reset ---");
+    bool allZeroed = true;
     for (uint8_t i = 0; i < numMotors; i++) {
         uint8_t motorID = motorIDs[i];
         // Send command 0x92 to read multi-turn angle
@@ -78,15 +84,29 @@ bool EncoderZeroing::zeroEncoders() {
             // Print angle in degrees (shaftAngle is in 0.01° units)
             Serial.printf("Motor ID 0x%02X: Shaft Angle = %.2f degrees\n", 
                           motorID, feedback.shaftAngle / 100.0);
+            // Check if angle is within ±2 degrees (±200 in 0.01° units)
+            if (abs(feedback.shaftAngle) > 200) {
+                allZeroed = false;
+            }
         } else {
             // Print error if command fails
             Serial.printf("Motor ID 0x%02X: Failed to read shaft angle\n", motorID);
+            allZeroed = false;
         }
         delay(10); // Small delay to avoid overwhelming the bus
     }
 
-    // Mark routine as completed
+    // Step 5: Check zeroing success and halt
+    if (allZeroed) {
+        Serial.println("\nAll motors zeroed successfully. Remove jumper and reboot.");
+        while (true) {} // Halt execution
+    } else {
+        Serial.println("\nZeroing failed for one or more motors. Check connections and retry.");
+        while (true) {} // Halt execution
+    }
+
+    // Mark routine as completed (unreachable due to halt)
     hasRun = true;
     Serial.println("Encoder zeroing completed");
     return true;
-}// EncoderZeroing.cpp  <92 Lines>
+}
