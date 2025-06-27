@@ -10,7 +10,7 @@ EncoderZeroing::EncoderZeroing(MyActuatorRMDX6V3* motors[], uint8_t jumperPin)
     pinMode(jumperPin, INPUT); // Set jumper pin as input
 }
 
-// Zeroes encoders if jumper is HIGH and hasn't run
+// Zeroes encoders if jumper is LOW and hasn't run
 bool EncoderZeroing::zeroEncoders() {
     // Check if routine has already run
     if (hasRun) {
@@ -18,8 +18,8 @@ bool EncoderZeroing::zeroEncoders() {
         return false;
     }
 
-    // Check if jumper is installed (HIGH)
-    if (digitalRead(jumperPin) != HIGH) {
+    // Check if jumper is not installed (LOW)
+    if (digitalRead(jumperPin) != LOW) {
         Serial.println("Jumper not detected, skipping encoder zeroing");
         return false;
     }

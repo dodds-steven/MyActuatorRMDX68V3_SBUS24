@@ -105,8 +105,8 @@ void setup() {
   sbusHandler.begin();
   motorController.init();
 
-  // Initialize all motors
- // Run encoder zeroing if jumperor switch on pin40 as defined in the Definitions.h is installed you must do this once before using the motors!!
+  // Zero all lifter motors on first run
+ // Run encoder zeroing if jumper is not intalled as defined in the Definitions.h is notinstalled you must do this once before using the motors!!
   if (encoderZeroing.zeroEncoders()) {
     Serial.println("Encoder zeroing completed successfully");
   } else {
