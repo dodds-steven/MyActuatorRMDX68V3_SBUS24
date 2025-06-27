@@ -3,8 +3,7 @@
 #include <HandleSBUS.h>
 #include <MyActuatorRMDX6V3.h>
 #include <Definitions.h>
-
-
+#include <EncoderZeroing.h>
 
 // Global motors array
 MotorConfig motors[NUM_MOTORS];
@@ -14,6 +13,8 @@ MyActuatorRMDX6V3 motor1(RS485_PORT, RS485_DIR_PIN);
 MyActuatorRMDX6V3 motor2(RS485_PORT, RS485_DIR_PIN);
 MyActuatorRMDX6V3 motor3(RS485_PORT, RS485_DIR_PIN);
 MyActuatorRMDX6V3 motor4(RS485_PORT, RS485_DIR_PIN);
+MyActuatorRMDX6V3* motorArray[NUM_MOTORS] = {&motor1, &motor2, &motor3, &motor4};
+EncoderZeroing encoderZeroing(motorArray); // Instantiate with motor array
 MotorController motorController(motors, NUM_MOTORS);
 MotorModeController motorModeController(motorController, sbusChannels);
 
@@ -104,6 +105,15 @@ void setup() {
   sbusHandler.begin();
   motorController.init();
 
+  // Initialize all motors
+ // Run encoder zeroing if jumperor switch on pin40 as defined in the Definitions.h is installed you must do this once before using the motors!!
+  if (encoderZeroing.zeroEncoders()) {
+    Serial.println("Encoder zeroing completed successfully");
+  } else {
+    Serial.println("Encoder zeroing skipped or already done");
+  }
+
+
   // Debug motors array after controller init
   Serial.println("Debugging motors array after MotorController init:");
   for (uint8_t i = 0; i < NUM_MOTORS; i++) {
@@ -134,4 +144,5 @@ void loop() {
   uint32_t loopStart = millis();
   motorModeController.update();
   Serial.printf("Loop time: %dms\n", millis() - loopStart);
-} // File: main.cpp (137 lines)
+}
+// File: main.cpp (152 lines)

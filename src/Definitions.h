@@ -7,6 +7,7 @@
 #define RS485_PORT Serial4
 #define RS485_DIR_PIN 41
 #define SBUS_PORT Serial1
+#define JUMPER_PIN 40 // Pin for jumper/switch to enable encoder zeroing
 
 // Motor definitions
 #define NUM_MOTORS 4

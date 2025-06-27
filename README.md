@@ -2,6 +2,7 @@
 
 Use the Operating Modes Branch for all of the latest functionality.  Also, make sure you rename main.cpp to main.cppBAK and then ResetAllMotorToZero.cppBak to 
 ResetAllMotorToZero.cpp.  Then have all of the motors at the lowest travel.  Compile and upload.  This will set the encoders to zero.  If you don't do this step the code will not work.  Once you have run the Zero procedure, rename the files back to their original names.  Then you can re-upload the code.  I have Motor1 in the Front left position, Motor2 the FrontRight, Motor3 the BackRight, and Motor4 the BackLeft.
+I have optionally put in some code to zero the motors if you install a jumper or switch on PIN 40.  I have not tested this yet.
 
 ### Updated README
 <xaiArtifact artifact_id="e90104cd-d624-42c2-8dbc-23434fa12763" artifact_version_id="253de576-515e-472c-aee2-aa8e324c4ab3" title="README.md" contentType="text/markdown">
