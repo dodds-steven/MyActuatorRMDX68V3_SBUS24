@@ -12,6 +12,8 @@ EncoderZeroing::EncoderZeroing(MyActuatorRMDX6V3* motors[], uint8_t jumperPin)
 
 // Zeroes encoders if jumper is LOW and hasn't run
 bool EncoderZeroing::zeroEncoders() {
+    Serial4.begin(RS485_BAUD_RATE); // Initialize RS485 port with defined baud rate
+
     // Check if routine has already run
     if (hasRun) {
         Serial.println("Encoder zeroing already completed");
@@ -108,5 +110,6 @@ bool EncoderZeroing::zeroEncoders() {
     // Mark routine as completed (unreachable due to halt)
     hasRun = true;
     Serial.println("Encoder zeroing completed");
+    Serial4.end(); // End Serial4 communication
     return true;
 }

@@ -101,10 +101,7 @@ void setup() {
     Serial.println((uintptr_t)motors[i].motor, HEX);
   }
 
-  // Initialize SBUS and motor controller
-  sbusHandler.begin();
-  motorController.init();
-
+ 
   // Zero all lifter motors on first run
  // Run encoder zeroing if jumper is not intalled as defined in the Definitions.h is notinstalled you must do this once before using the motors!!
   if (encoderZeroing.zeroEncoders()) {
@@ -113,6 +110,10 @@ void setup() {
     Serial.println("Encoder zeroing skipped or already done");
   }
 
+  // Initialize SBUS and motor controller
+   sbusHandler.begin();
+   motorController.init();
+ 
 
   // Debug motors array after controller init
   Serial.println("Debugging motors array after MotorController init:");
