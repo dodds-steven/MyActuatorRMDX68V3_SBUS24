@@ -18,7 +18,18 @@ EncoderZeroing encoderZeroing(motorArray); // Instantiate with motor array
 MotorController motorController(motors, NUM_MOTORS);
 MotorModeController motorModeController(motorController, sbusChannels);
 
+// ========= Set pin number and other variables for onboard LED Heartbeat ===============
+bool beatState = LOW;           // beatState used to set the onboard LED
+long beatPreviousMillis = 0;    // will store last time LED was updated
+long beatInterval = 1000;       // The interval at which to blink the onboard LED (milliseconds)
+void heartBeat();
+// =======================================================================================
+
+
+
 void setup() {
+  pinMode(LED_BUILTIN, OUTPUT); // set the digital pin as output for Heartbeat onboard LED:
+
   // Initialize serial communication for debugging
   Serial.begin(115200);
   while (!Serial && millis() < 1000);
@@ -145,5 +156,22 @@ void loop() {
   uint32_t loopStart = millis();
   motorModeController.update();
   Serial.printf("Loop time: %dms\n", millis() - loopStart);
+
+    heartBeat();   // Call the heartBeat function
 }
-// File: main.cpp (152 lines)
+
+
+//  onboard LED Heartbeat function
+void heartBeat()
+{
+  unsigned long currentMillis = millis();
+  if(currentMillis - beatPreviousMillis > beatInterval) {
+    beatPreviousMillis = currentMillis;   
+    if (beatState == LOW)
+      beatState = HIGH;
+    else
+      beatState = LOW;
+    digitalWrite(beatPin, beatState);
+  }
+}
+
