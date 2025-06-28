@@ -171,7 +171,7 @@ void heartBeat()
       beatState = HIGH;
     else
       beatState = LOW;
-    digitalWrite(beatPin, beatState);
+    digitalWrite(LED_BUILTIN, beatState);
   }
 }
 
