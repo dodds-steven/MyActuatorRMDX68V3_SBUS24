@@ -19,9 +19,9 @@ MotorController motorController(motors, NUM_MOTORS);
 MotorModeController motorModeController(motorController, sbusChannels);
 
 // ========= Set pin number and other variables for onboard LED Heartbeat ===============
-bool beatState = LOW;           // beatState used to set the onboard LED
-long beatPreviousMillis = 0;    // will store last time LED was updated
-long beatInterval = 1000;       // The interval at which to blink the onboard LED (milliseconds)
+bool beatState = LOW;                    // beatState used to set the onboard LED
+unsigned long beatPreviousMillis = 0;    // will store last time LED was updated
+unsigned long beatInterval = 1000;       // The interval at which to blink the onboard LED (milliseconds)
 void heartBeat();
 // =======================================================================================
 

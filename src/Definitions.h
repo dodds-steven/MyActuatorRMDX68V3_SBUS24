@@ -1,8 +1,6 @@
 #ifndef DEFINITIONS_H
 #define DEFINITIONS_H
 
-#include <Arduino.h>
-
 // Port definitions
 #define RS485_PORT Serial4
 #define RS485_BAUD_RATE 115200 // Baud rate for RS485 communication
