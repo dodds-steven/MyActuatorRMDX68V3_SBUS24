@@ -8,7 +8,10 @@
 #define RS485_BAUD_RATE 115200 // Baud rate for RS485 communication
 #define RS485_DIR_PIN 41
 #define SBUS_PORT Serial1
+#define SBUS_RX_PIN 0     // SBUS RX pin (Serial1 RX) This has match the Chosen serial port
+#define SBUS_TX_PIN 1     // SBUS TX pin (Serial1 TX) This has match the Chosen serial port
 #define JUMPER_PIN 20 // Pin for jumper/switch to enable encoder zeroing
+#define LED_PIN 13 // Pin for onboard LED
 
 // Motor definitions
 #define NUM_MOTORS 4

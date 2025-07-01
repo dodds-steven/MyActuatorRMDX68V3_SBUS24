@@ -29,12 +29,11 @@
  
  #include <Arduino.h>
  #include "SBUS.h"
+ #include "Definitions.h" // Include Definitions.h for SBUS_PORT, SBUS_RX_PIN, SBUS_TX_PIN
  
  // Configuration constants
  #define DEBUG_FEEDBACK false       // Enable debug logging (true) or disable (false)
  #define VERBOSE_DEBUG false        // Verbose debug output (1 for enabled, 0 for disabled)
- #define SBUS_RX_PIN 0             // Serial1 RX pin on Teensy 4.1
- #define SBUS_TX_PIN 1             // Serial1 TX pin on Teensy 4.1
  #define SBUS_BAUD 100000          // SBUS baud rate
  #define SBUS_MIN 172              // Minimum valid channel value
  #define SBUS_MAX 1811             // Maximum valid channel value
@@ -47,6 +46,7 @@
  
  class SBUSHandler {
  private:
+   HardwareSerial& serialPort;      // Reference to serial port (e.g., Serial1)
    SBUS sbus;                      // SBUS library instance
    uint16_t lastValidChannels[SBUS_CHANNELS]; // Last valid channel values
    bool hasValidSBUS;              // Flag for valid SBUS data
@@ -58,10 +58,11 @@
    elapsedMillis lastRead;         // Timer for read intervals
  
  public:
-   // Constructor with optional verbose setting
-   SBUSHandler(bool verbose = DEBUG_FEEDBACK);
+   // Constructors
+   SBUSHandler(bool verbose = DEBUG_FEEDBACK); // Default port (SBUS_PORT)
+   SBUSHandler(HardwareSerial& port, bool verbose = DEBUG_FEEDBACK); // Explicit port
    
-   // Initialize Serial1 and SBUS library
+   // Initialize serial port and SBUS library
    void begin();
    
    // Read SBUS channels, output channel array
@@ -75,4 +76,4 @@
  };
  
  #endif
- // File: HandleSBUS.h (39 lines)
+ // File: HandleSBUS.h (79 lines)
