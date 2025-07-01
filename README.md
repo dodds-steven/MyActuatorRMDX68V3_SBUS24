@@ -1,8 +1,11 @@
 # MyActuatorRMDX68V3_SBUS24
 
-Use the Operating Modes Branch for all of the latest functionality.  Also, make sure you rename main.cpp to main.cppBAK and then ResetAllMotorToZero.cppBak to 
-ResetAllMotorToZero.cpp.  Then have all of the motors at the lowest travel.  Compile and upload.  This will set the encoders to zero.  If you don't do this step the code will not work.  Once you have run the Zero procedure, rename the files back to their original names.  Then you can re-upload the code.  I have Motor1 in the Front left position, Motor2 the FrontRight, Motor3 the BackRight, and Motor4 the BackLeft.
-I have optionally put in some code to zero the motors if you install a jumper or switch on PIN 40.  I have not tested this yet.
+I added code to automatically set the zero for the motors when you run the code.  I do this with a jumper between 3.3V and Pin 20.  You can use whatever pin you like.  However, just make sure you set that pin in the Definitions.h  WHen the pin is NOT installed the code will set the lifter motor encoders to ZERO at wherever the lifter motors are when you power up.  The intended position is the lowest position.  In other words, I expect the motors at their lowest travel (the place where the motors will be with no power)    When you run without the jumper you will get start and finish reports of the shaft angle of the motor.  The end report should be near zero degrees (plus or minus two degrees according to the manufacturor).  You can run it again if you like. 
+Once you have run the zeroing routine.  Power off the droid and install the jumper.  Now, when you boot up, you will be in the main program look that looks for the status of you Mode control switch.  Mine is on SBUS CH3.  
+I have a three-position switch on my transmitter set to CH3.  The goal is to have the mecanum drive motors disabled in the SHUTDOWN, and STATIC modes.  THe Mecanum drive motors are enabled in the MOBILE mode.
+SHUTDOWN - Mecanum drives disabled.  THe droid settles to the bottom of travel so you can safely and elegantly power off.
+STATIC -  Mecanum drives disable.  Allows full animation of the droid while staying in place (good for puppeting near a person when you don't want to hit them. hehe)
+MOBILE - Mecanumd drives enabled.  Allows full driving with augmented/automatic tilt and roll of the lifter motors to add character during turns, acceleration, etc.
 
 ### Updated README
 <xaiArtifact artifact_id="e90104cd-d624-42c2-8dbc-23434fa12763" artifact_version_id="253de576-515e-472c-aee2-aa8e324c4ab3" title="README.md" contentType="text/markdown">
