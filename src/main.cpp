@@ -25,8 +25,7 @@ void setup()
   digitalWrite(LED_PIN, LOW); // Initialize LED to off
   // Initialize serial communication for debugging
   Serial.begin(115200);
-  while (!Serial && millis() < 1000)
-    ;
+  while (!Serial && millis() < 1000);
 
   // Debug Definitions.h constants
   Serial.println("Debugging Definitions.h constants:");
@@ -167,4 +166,3 @@ void loop()
   motorModeController.update();
   Serial.printf("Loop time: %dms\n", millis() - loopStart);
 }
-// File: main.cpp (152 lines)
