@@ -7,7 +7,7 @@
  * (0–23) in the range 172–1811 for motor control (e.g., RMD X6-8 V3). The implementation:
  * - Polls SBUS every 8.5ms, with a 1.5ms post-read wait to align with frame boundaries.
  * - Validates all channels (172–1811), trusts library’s failsafe and lostFrame flags.
- * - Flushes Serial1 buffer to 25 bytes if >40 bytes to prevent overflow.
+ * - Flushes serial buffer to 25 bytes if >40 bytes to prevent overflow.
  * - Skips reads if <25 bytes to avoid partial frames.
  * - Centers channels (992) after 5 consecutive failed reads.
  * - Logs debug info (successes, failures, flushes, channel values) if VERBOSE_DEBUG is true.
@@ -27,22 +27,32 @@
 
  #include "HandleSBUS.h"
 
- // Constructor: Initialize SBUS instance and set default channel values to center
- SBUSHandler::SBUSHandler(bool verbose) : sbus(Serial1), hasValidSBUS(false), sbusFailCount(0),
-                                         verboseFeedback(verbose), readSuccessCount(0), readFailCount(0),
-                                         flushCount(0), lastRead(0) {
+ // Constructor: Default port (SBUS_PORT)
+ SBUSHandler::SBUSHandler(bool verbose) 
+   : serialPort(SBUS_PORT), sbus(SBUS_PORT), hasValidSBUS(false), sbusFailCount(0),
+     verboseFeedback(verbose), readSuccessCount(0), readFailCount(0),
+     flushCount(0), lastRead(0) {
    for (uint8_t i = 0; i < SBUS_CHANNELS; i++) lastValidChannels[i] = SBUS_CENTER;
  }
  
- // Initialize Serial1, clear buffer, and set up SBUS library
+ // Constructor: Explicit port
+ SBUSHandler::SBUSHandler(HardwareSerial& port, bool verbose) 
+   : serialPort(port), sbus(port), hasValidSBUS(false), sbusFailCount(0),
+     verboseFeedback(verbose), readSuccessCount(0), readFailCount(0),
+     flushCount(0), lastRead(0) {
+   for (uint8_t i = 0; i < SBUS_CHANNELS; i++) lastValidChannels[i] = SBUS_CENTER;
+ }
+ 
+ // Initialize serial port, clear buffer, and set up SBUS library
  void SBUSHandler::begin() {
    delay(SBUS_STARTUP_DELAY); // Wait for receiver stability
-   Serial1.begin(SBUS_BAUD, SERIAL_8E2); // Start Serial1 with SBUS baud and parity
-   while (Serial1.available()) Serial1.read(); // Clear any stale data
+   serialPort.begin(SBUS_BAUD, SERIAL_8E2); // Start serial port with SBUS baud and parity
+   while (serialPort.available()) serialPort.read(); // Clear any stale data
    sbus.begin(SBUS_RX_PIN, SBUS_TX_PIN, true, SBUS_BAUD); // Initialize SBUS with inversion
  #if VERBOSE_DEBUG
    if (verboseFeedback) {
-     Serial.println("SBUS initialized with baud rate 100000, RX pin 0, TX pin 1, Parity=8E2");
+     Serial.printf("SBUS initialized with baud rate %d, RX pin %d, TX pin %d, Parity=8E2\n",
+                   SBUS_BAUD, SBUS_RX_PIN, SBUS_TX_PIN);
    }
  #endif
  }
@@ -56,8 +66,8 @@
    }
    lastRead = 0; // Reset read timer
  
-   // Get available bytes in Serial1 buffer
-   int bytesAvailable = Serial1.available();
+   // Get available bytes in serial buffer
+   int bytesAvailable = serialPort.available();
  #if VERBOSE_DEBUG
    if (verboseFeedback) {
      Serial.printf("SBUS: Attempting read, bytes available: %d\n", bytesAvailable);
@@ -139,8 +149,8 @@
        Serial.printf("SBUS: Flushing %d excess bytes\n", bytesToFlush);
      }
  #endif
-     for (int i = 0; i < bytesToFlush && Serial1.available(); i++) {
-       Serial1.read();
+     for (int i = 0; i < bytesToFlush && serialPort.available(); i++) {
+       serialPort.read();
      }
    }
  
@@ -190,4 +200,4 @@
    }
  #endif
  }
- // File: HandleSBUS.cpp (104 lines)
+ // File: HandleSBUS.cpp (203 lines)
