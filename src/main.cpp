@@ -25,8 +25,7 @@ void setup()
   digitalWrite(LED_PIN, LOW); // Initialize LED to off
   // Initialize serial communication for debugging
   Serial.begin(115200);
-  while (!Serial && millis() < 1000)
-    ;
+  while (!Serial && millis() < 1000);
 
   // Debug Definitions.h constants
   Serial.println("Debugging Definitions.h constants:");
@@ -106,7 +105,7 @@ void setup()
     Serial.print("°, motor=");
     Serial.println((uintptr_t)motors[i].motor, HEX);
   }
-
+ 
   // Zero all lifter motors on first run
   // Run encoder zeroing if jumper is not intalled as defined in the Definitions.h is not installed you must do this once before using the motors!!
   if (encoderZeroing.zeroEncoders())
@@ -119,8 +118,8 @@ void setup()
   }
 
   // Initialize SBUS and motor controller
-  sbusHandler.begin();
-  motorController.init();
+   sbusHandler.begin();
+   motorController.init();
 
   // Debug motors array after controller init
   Serial.println("Debugging motors array after MotorController init:");
@@ -167,4 +166,3 @@ void loop()
   motorModeController.update();
   Serial.printf("Loop time: %dms\n", millis() - loopStart);
 }
-// File: main.cpp (152 lines)
