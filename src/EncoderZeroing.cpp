@@ -20,9 +20,9 @@ bool EncoderZeroing::zeroEncoders() {
         return false;
     }
 
-    // Check if jumper is not installed (LOW)
-    if (digitalRead(jumperPin) != LOW) {
-        Serial.println("Jumper not detected, skipping encoder zeroing");
+    // Check if jumper is installed (HIGH)
+    if (digitalRead(jumperPin) == HIGH) {
+        Serial.println("Jumper detected, skipping encoder zeroing");
         return false;
     }
 

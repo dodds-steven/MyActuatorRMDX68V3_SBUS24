@@ -6,10 +6,10 @@
 #define RS485_BAUD_RATE 115200 // Baud rate for RS485 communication
 #define RS485_DIR_PIN 41
 #define SBUS_PORT Serial1
-#define SBUS_RX_PIN 0     // SBUS RX pin (Serial1 RX) This has match the Chosen serial port
-#define SBUS_TX_PIN 1     // SBUS TX pin (Serial1 TX) This has match the Chosen serial port
+#define SBUS_RX_PIN 0 // SBUS RX pin (Serial1 RX) This has match the Chosen serial port
+#define SBUS_TX_PIN 1 // SBUS TX pin (Serial1 TX) This has match the Chosen serial port
 #define JUMPER_PIN 20 // Pin for jumper/switch to enable encoder zeroing
-#define LED_PIN 13 // Pin for onboard LED
+#define LED_PIN 13    // Pin for onboard LED
 
 // Motor definitions
 #define NUM_MOTORS 4
@@ -41,8 +41,8 @@ const float MOTOR4_MAX = 115.00;  // Motor 4 RobotHigh
 #define STATIC_Y_CHANNEL 14        // CH14/Y (index 13): Controls pitch (Motor2/Motor4) in STATIC mode
 #define MOBILE_X_CHANNEL 13        // CH13/X (index 12): Controls roll (Motor1/Motor3) in MOBILE mode
 #define MOBILE_Y_CHANNEL 14        // CH14/Y (index 13): Controls pitch (Motor2/Motor4) in MOBILE mode
-     // STRAFE_X_CHANNEL ****** could be 17-19 uncertan at the moment, i selected 17 
-#define STRAFE_X_CHANNEL 17        // CH17/X (index 16): Controls lateral movement (strafe) in applicable modes 
+                                   // STRAFE_X_CHANNEL ****** could be 17-19 uncertan at the moment, i selected 17
+#define STRAFE_X_CHANNEL 17        // CH17/X (index 16): Controls lateral movement (strafe) in applicable modes
 #define FOOTLIFT_HEIGHT_CHANNEL 16 // CH16 (index 15): Controls foot lift height in MOBILE mode
 
 #endif
