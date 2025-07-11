@@ -155,7 +155,7 @@ void loop()
   // Update loop time
   lastLoopTime = currentTime;
 
-  // Toggle LED every 1000ms (500ms on, 500ms off)
+  // Toggle LED every 1000ms
   if (currentTime - lastLEDToggle >= 1000) {
     ledState = !ledState;
     digitalWrite(LED_PIN, ledState ? HIGH : LOW);
@@ -164,5 +164,5 @@ void loop()
 
   uint32_t loopStart = millis();
   motorModeController.update();
-  Serial.printf("Loop time: %dms\n", millis() - loopStart);
+  //Serial.printf("Loop time: %dms\n", millis() - loopStart);
 }
