@@ -100,11 +100,29 @@ bool EncoderZeroing::zeroEncoders() {
 
     // Step 5: Check zeroing success and halt
     if (allZeroed) {
-        Serial.println("\nAll motors zeroed successfully. Remove jumper and reboot.");
-        while (true) {} // Halt execution
+        Serial.println("\nAll motors zeroed successfully. Replace jumper and reboot.");
+        while (true) {
+            digitalWrite(LED_BUILTIN, HIGH);
+            delay(1500);
+            digitalWrite(LED_BUILTIN, LOW);
+            delay(1500);
+        } // Halt execution
     } else {
         Serial.println("\nZeroing failed for one or more motors. Check connections and retry.");
-        while (true) {} // Halt execution
+        while (true) {
+            digitalWrite(13, HIGH);
+            delay(200);
+            digitalWrite(13, LOW);
+            delay(200); 
+            digitalWrite(13, HIGH);
+            delay(200);
+            digitalWrite(13, LOW);
+            delay(200); 
+            digitalWrite(13, HIGH);
+            delay(200);
+            digitalWrite(13, LOW);
+            delay(1000); 
+        } // Halt execution
     }
 
     // Mark routine as completed (unreachable due to halt)
