@@ -20,6 +20,10 @@ MotorModeController motorModeController(motorController, sbusChannels);
 
 void setup()
 {
+  // hold for a few second to allow RMD actuators to start up
+   Serial.println("hold for RMD boot");
+   delay(3000);
+   Serial.println("Begin setup");
   // Setup onboard LED pin for heartbeat activity light
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW); // Initialize LED to off

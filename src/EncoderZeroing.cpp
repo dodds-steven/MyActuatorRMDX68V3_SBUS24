@@ -103,25 +103,25 @@ bool EncoderZeroing::zeroEncoders() {
         Serial.println("\nAll motors zeroed successfully. Replace jumper and reboot.");
         while (true) {
             digitalWrite(LED_BUILTIN, HIGH);
-            delay(1500);
+            delay(1000);
             digitalWrite(LED_BUILTIN, LOW);
-            delay(1500);
+            delay(250);
         } // Halt execution
     } else {
         Serial.println("\nZeroing failed for one or more motors. Check connections and retry.");
         while (true) {
-            digitalWrite(13, HIGH);
+            digitalWrite(LED_BUILTIN, HIGH);
             delay(200);
-            digitalWrite(13, LOW);
+            digitalWrite(LED_BUILTIN, LOW);
             delay(200); 
-            digitalWrite(13, HIGH);
+            digitalWrite(LED_BUILTIN, HIGH);
             delay(200);
-            digitalWrite(13, LOW);
+            digitalWrite(LED_BUILTIN, LOW);
             delay(200); 
-            digitalWrite(13, HIGH);
+            digitalWrite(LED_BUILTIN, HIGH);
             delay(200);
-            digitalWrite(13, LOW);
-            delay(1000); 
+            digitalWrite(LED_BUILTIN, LOW);
+            delay(1250); 
         } // Halt execution
     }
 
