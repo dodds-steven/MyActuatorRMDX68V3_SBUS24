@@ -103,7 +103,7 @@ bool EncoderZeroing::zeroEncoders() {
         Serial.println("\nAll motors zeroed successfully. Replace jumper and reboot.");
         while (true) {
             digitalWrite(LED_BUILTIN, HIGH);
-            delay(1000);
+            delay(2000);
             digitalWrite(LED_BUILTIN, LOW);
             delay(250);
         } // Halt execution
