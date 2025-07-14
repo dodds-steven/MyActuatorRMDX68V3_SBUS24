@@ -4,7 +4,7 @@
 // Port definitions
 #define RS485_PORT Serial4
 #define RS485_BAUD_RATE 115200 // Baud rate for RS485 communication
-#define RS485_DIR_PIN 41
+#define RS485_DIR_PIN 41 // pin used by Trevor's board for Searl4
 #define SBUS_PORT Serial1
 #define SBUS_RX_PIN 0 // SBUS RX pin (Serial1 RX) This has match the Chosen serial port
 #define SBUS_TX_PIN 1 // SBUS TX pin (Serial1 TX) This has match the Chosen serial port

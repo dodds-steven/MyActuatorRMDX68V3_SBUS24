@@ -24,7 +24,7 @@ The B2-EMO Pro Drive system uses a Teensy 4.1 microcontroller to control four My
 ### Hardware Requirements
 
 - **Microcontroller**: Teensy 4.1
-- **Lifter Motors**: 4x MyActuator RMDX6V3 with RS485 communication (`RS485_PORT=Serial4`, `RS485_DIR_PIN=41`)
+- **Lifter Motors**: 4x MyActuator RMDX6V3 with RS485 communication. default: (`RS485_PORT=Serial4`, `RS485_DIR_PIN=41`)
 - **Drive Motors**: UUMotor 4-inch brushless hub motors on AndyMark 6-inch mecanum wheels
 - **SBUS Receiver**: Connected to `SBUS_PORT=Serial1`
 - **Transmitter**: Multi-channel SBUS-compatible transmitter (e.g., FrSky Taranis)

@@ -53,7 +53,7 @@ bool RS485Comm::readFeedback(uint8_t *response, uint8_t &response_length, uint8_
     unsigned long startTime = millis();
 
 #if verboseDebug
-    Serial.println("RS485: Clearing Serial4 buffer");
+    Serial.println("RS485: Clearing Serial buffer");
     while (_serial.available()) {
         uint8_t discarded = _serial.read();
         Serial.printf("RS485: Discarded byte: 0x%02X\n", discarded);

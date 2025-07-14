@@ -12,7 +12,7 @@ EncoderZeroing::EncoderZeroing(MyActuatorRMDX6V3* motors[], uint8_t jumperPin)
 
 // Zeroes encoders if jumper is LOW and hasn't run
 bool EncoderZeroing::zeroEncoders() {
-    Serial4.begin(RS485_BAUD_RATE); // Initialize RS485 port with defined baud rate
+    RS485_PORT.begin(RS485_BAUD_RATE); // Initialize RS485 port with defined baud rate
 
     // Check if routine has already run
     if (hasRun) {
@@ -69,10 +69,10 @@ bool EncoderZeroing::zeroEncoders() {
     Serial.println("\nWaiting 500ms...");
     delay(500);
 
-    //End Serial4 becasue motors will not respond after reset
-    Serial4.end();
-    // Reinitialize Serial4 for communication after reset
-    Serial4.begin(RS485_BAUD_RATE);// Reinitialize RS485 port with defined baud rate
+    //End Serial becasue motors will not respond after reset
+    RS485_PORT.end();
+    // Reinitialize Serial for communication after reset
+    RS485_PORT.begin(RS485_BAUD_RATE);// Reinitialize RS485 port with defined baud rate
 
     // Step 4: Read and print final shaft angles for all motors
     Serial.println("\n--- Final Shaft Angles After Zeroing and Reset ---");
@@ -128,6 +128,6 @@ bool EncoderZeroing::zeroEncoders() {
     // Mark routine as completed (unreachable due to halt)
     hasRun = true;
     Serial.println("Encoder zeroing completed");
-    Serial4.end(); // End Serial4 communication
+    RS485_PORT.end(); // End Serial communication
     return true;
 }
