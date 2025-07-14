@@ -166,7 +166,7 @@ void loop()
     lastLEDToggle = currentTime;
   }
 
-  uint32_t loopStart = millis();
+  //uint32_t loopStart = millis();
   motorModeController.update();
   //Serial.printf("Loop time: %dms\n", millis() - loopStart);
 }
