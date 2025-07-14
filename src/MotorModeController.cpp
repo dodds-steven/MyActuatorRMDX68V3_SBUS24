@@ -6,7 +6,7 @@ extern SBUSHandler sbusHandler;
 // Constructor: Initializes with motor controller and SBUS channels
 MotorModeController::MotorModeController(MotorController& motorController, uint16_t* sbusChannels)
   : motorController(motorController), sbusChannels(sbusChannels), currentMode(STATIC),
-    lastModeSwitchTime(0), lastCh3Value(0), shutdownActive(false) {
+    lastModeSwitchTime(0), lastChValue(0), shutdownActive(false) {
   for (uint8_t i = 0; i < NUM_MOTORS; i++) {
     motorPositions[i] = (i == 0 || i == 2) ? -500 : 500; // Initialize to shutdown positions (Motor1/Motor3: -5.00°, Motor2/Motor4: 5.00°)
     lastUpdateTime[i] = 0;
@@ -36,25 +36,25 @@ void MotorModeController::update() {
   Serial.print("SBUS read: channelsRead=");
   Serial.print(channelsRead);
   if (channelsRead && CONTROL_MODE-1 < SBUS_CHANNELS && STATIC_Y_CHANNEL-1 < SBUS_CHANNELS && STATIC_X_CHANNEL-1 < SBUS_CHANNELS) {
-    Serial.print(", CH3=");
+    Serial.print(", CONTROL_MODE=");
     Serial.print(sbusChannels[CONTROL_MODE-1]);
-    Serial.print(", CH2/Y=");
+    Serial.print(", Y_CHANNEL=");
     Serial.print(sbusChannels[STATIC_Y_CHANNEL-1]);
-    Serial.print(", CH1/X=");
+    Serial.print(", X_CHANNEL=");
     Serial.print(sbusChannels[STATIC_X_CHANNEL-1]);
-    Serial.print(", CH18=");
+    Serial.print(", FOOTLIFT_HEIGHT_CHANNEL=");
     Serial.println(sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1]);
   } else {
     Serial.println(", Invalid channel indices or read failed");
   }
 #endif
 
-  // Determine new mode based on CH3 value
+  // Determine new mode based on modeValue value reading from CONTROL_MODE channel
   Mode newMode = currentMode;
-  uint16_t ch3 = (channelsRead && CONTROL_MODE-1 < SBUS_CHANNELS) ? sbusChannels[CONTROL_MODE-1] : lastCh3Value;
-  if (ch3 < STATIC_THRESHOLD) {
+  uint16_t modeValue = (channelsRead && CONTROL_MODE-1 < SBUS_CHANNELS) ? sbusChannels[CONTROL_MODE-1] : lastChValue;
+  if (modeValue < MOBILE_THRESHOLD) {    
     newMode = STATIC;
-  } else if (ch3 < MOBILE_THRESHOLD) {
+  } else if (modeValue < STATIC_THRESHOLD) {
     newMode = MOBILE;
   } else {
     newMode = SHUTDOWN;
@@ -64,7 +64,7 @@ void MotorModeController::update() {
   if (newMode != currentMode && (currentTime - lastModeSwitchTime) > DEBOUNCE_INTERVAL) {
     currentMode = newMode;
     lastModeSwitchTime = currentTime;
-    lastCh3Value = ch3;
+    lastChValue = modeValue;
     shutdownActive = false;
 #if MC_DEBUG_VERBOSE
     Serial.print("Mode switched to: ");
