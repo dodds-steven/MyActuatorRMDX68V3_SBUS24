@@ -2,7 +2,7 @@
 #define DEFINITIONS_H
 
 // Port definitions
-#define RS485_PORT Serial4
+#define RS485_PORT Serial3
 #define RS485_BAUD_RATE 115200 // Baud rate for RS485 communication
 #define RS485_DIR_PIN 41 // pin used by Trevor's board for Searl4
 #define SBUS_PORT Serial1
