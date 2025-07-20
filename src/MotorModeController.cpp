@@ -53,11 +53,11 @@ void MotorModeController::update() {
   Mode newMode = currentMode;
   uint16_t modeValue = (channelsRead && CONTROL_MODE-1 < SBUS_CHANNELS) ? sbusChannels[CONTROL_MODE-1] : lastChValue;
   if (modeValue < STATIC_THRESHOLD) {    
-    newMode = STATIC;
+    newMode = STATIC;     // radio value for Forward is 988
   } else if (modeValue < MOBILE_THRESHOLD) {
-    newMode = MOBILE;
+    newMode = MOBILE;     // radio value for center is 1500
   } else {
-    newMode = SHUTDOWN;
+    newMode = SHUTDOWN;   // Radio value for Back is 2012
   }
 
   // Handle mode switch with debounce
