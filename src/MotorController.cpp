@@ -1,10 +1,15 @@
 #include <MotorController.h>
 #include <MyActuatorRMDX6V3.h>
 
+// add debug toggle to help thin out serial output
+#define M_DEBUG_VERBOSE false
+
 MotorController::MotorController(MotorConfig* motors, uint8_t numMotors)
   : motors(motors), numMotors(numMotors) {
   Serial.print("MotorController initialized with numMotors=");
   Serial.println(numMotors);
+  
+#if M_DEBUG_VERBOSE
   // Debug motors array in constructor
   Serial.println("Debugging motors array in MotorController constructor:");
   for (uint8_t i = 0; i < numMotors; i++) {
@@ -21,6 +26,7 @@ MotorController::MotorController(MotorConfig* motors, uint8_t numMotors)
     Serial.print("°, motor=");
     Serial.println((uintptr_t)motors[i].motor, HEX);
   }
+#endif
 }
 
 bool MotorController::init() {
@@ -143,11 +149,13 @@ int32_t MotorController::getCurrentPosition(uint8_t motorIndex) {
     return 0;
   }
   int32_t position = motors[motorIndex].motor->ReadMultiTurnAngle(motors[motorIndex].id);
+  #if M_DEBUG_VERBOSE
   Serial.print("M");
   Serial.print(motorIndex + 1);
   Serial.print(" getCurrentPosition: Pos=");
   Serial.print(position / 100.0f);
   Serial.println("°");
+  #endif
   return position;
 }
 
@@ -166,11 +174,13 @@ void MotorController::shutdownMotor(uint8_t motorIndex) {
 
 int32_t MotorController::getMinPos(uint8_t motorIndex) {
   if (motorIndex < numMotors) {
+    #if M_DEBUG_VERBOSE
     Serial.print("M");
     Serial.print(motorIndex + 1);
     Serial.print(" getMinPos: ");
     Serial.print(motors[motorIndex].minPos / 100.0f);
     Serial.println("°");
+    #endif
     return motors[motorIndex].minPos;
   }
   Serial.print("M");
@@ -181,11 +191,13 @@ int32_t MotorController::getMinPos(uint8_t motorIndex) {
 
 int32_t MotorController::getMaxPos(uint8_t motorIndex) {
   if (motorIndex < numMotors) {
+    #if M_DEBUG_VERBOSE
     Serial.print("M");
     Serial.print(motorIndex + 1);
     Serial.print(" getMaxPos: ");
     Serial.print(motors[motorIndex].maxPos / 100.0f);
     Serial.println("°");
+    #endif
     return motors[motorIndex].maxPos;
   }
   Serial.print("M");
@@ -196,10 +208,12 @@ int32_t MotorController::getMaxPos(uint8_t motorIndex) {
 
 bool MotorController::getUpIsPositive(uint8_t motorIndex) {
   if (motorIndex < numMotors) {
+    #if M_DEBUG_VERBOSE
     Serial.print("M");
     Serial.print(motorIndex + 1);
     Serial.print(" getUpIsPositive: ");
     Serial.println(motors[motorIndex].UpIsPositive);
+    #endif
     return motors[motorIndex].UpIsPositive;
   }
   Serial.print("M");
@@ -210,10 +224,12 @@ bool MotorController::getUpIsPositive(uint8_t motorIndex) {
 
 bool MotorController::isCommActive(uint8_t motorIndex) {
   if (motorIndex < numMotors) {
+    #if M_DEBUG_VERBOSE
     Serial.print("M");
     Serial.print(motorIndex + 1);
     Serial.print(" isCommActive: ");
     Serial.println(motors[motorIndex].commActive);
+    #endif
     return motors[motorIndex].commActive;
   }
   Serial.print("M");
@@ -224,10 +240,12 @@ bool MotorController::isCommActive(uint8_t motorIndex) {
 
 bool MotorController::isSafeToMove(uint8_t motorIndex) {
   if (motorIndex < numMotors) {
+    #if M_DEBUG_VERBOSE
     Serial.print("M");
     Serial.print(motorIndex + 1);
     Serial.print(" isSafeToMove: ");
     Serial.println(motors[motorIndex].safeToMove);
+    #endif
     return motors[motorIndex].safeToMove;
   }
   Serial.print("M");
@@ -235,4 +253,3 @@ bool MotorController::isSafeToMove(uint8_t motorIndex) {
   Serial.println(" isSafeToMove: invalid index, returning false");
   return false;
 }
-// File: MotorController.cpp (184 lines)
