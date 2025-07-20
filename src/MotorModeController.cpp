@@ -49,12 +49,12 @@ void MotorModeController::update() {
   }
 #endif
 
-  // Determine new mode based on modeValue value reading from CONTROL_MODE channel
+  // Determine new mode based on CONTROL_MODE channel value
   Mode newMode = currentMode;
   uint16_t modeValue = (channelsRead && CONTROL_MODE-1 < SBUS_CHANNELS) ? sbusChannels[CONTROL_MODE-1] : lastChValue;
-  if (modeValue < MOBILE_THRESHOLD) {    
+  if (modeValue < STATIC_THRESHOLD) {    
     newMode = STATIC;
-  } else if (modeValue < STATIC_THRESHOLD) {
+  } else if (modeValue < MOBILE_THRESHOLD) {
     newMode = MOBILE;
   } else {
     newMode = SHUTDOWN;
