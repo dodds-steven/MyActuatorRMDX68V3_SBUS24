@@ -7,8 +7,10 @@
 #include <Arduino.h>
 
 #define MC_DEBUG_VERBOSE false
-#define STATIC_THRESHOLD 500      // threshold for STATIC mode
-#define MOBILE_THRESHOLD 1300     // threshold for MOBILE mode
+// NOTE: SBUS CHANNEL values are not the same as displayed on the radio interface.
+// they range from 172 to 1811 with the middle around 992
+#define STATIC_THRESHOLD 1300     // threshold for STATIC mode 
+#define MOBILE_THRESHOLD 500      // threshold for MOBILE mode
 #define DEBOUNCE_INTERVAL 200     // ms, minimum time between mode switches
 #define ROLL_SCALE 7.0f           // Scaling factor for roll in MOBILE mode
 #define UPDATE_INTERVAL 25        // 25ms update interval for motor commands
