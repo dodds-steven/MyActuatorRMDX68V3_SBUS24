@@ -4,7 +4,7 @@
 #include <Arduino.h>
 
 // RS485 Communication speed configuration
-#define RS485_COMM_DELAY 25 // milliseconds to wait after sending command before reading response (original value was 50ms)
+#define RS485_COMM_DELAY 10 // milliseconds to wait after sending command before reading response (original value was 50ms)
 
 class RS485Comm {
 public:

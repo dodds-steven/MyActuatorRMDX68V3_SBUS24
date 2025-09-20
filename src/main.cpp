@@ -151,8 +151,8 @@ void loop()
   static bool ledState = false;         // LED state (false = off, true = on)
   uint32_t currentTime = millis();      // Cache current time
 
-  // Throttle main loop to 25ms
-  if (currentTime - lastLoopTime < 25) {
+  // Throttle main loop to 10 (originaly 25ms)
+  if (currentTime - lastLoopTime < 10) { 
     return;
   }
 
