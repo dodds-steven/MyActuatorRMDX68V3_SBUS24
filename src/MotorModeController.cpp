@@ -1,5 +1,12 @@
 #include <MotorModeController.h>
 
+// Toggle dual-gimbal averaging feature
+// Original intent: Average left gimbal (originaly CH5/CH6) with right gimbal (defined CH13/CH14) for body position + compensation
+// once the reason for this is determined maybe I will re enable it. 
+//new #define values for channels are in the definitions.h file to assign proper channels
+// Set to 0 to disable, 1 to enable (for testing/debugging)
+#define ENABLE_DUAL_GIMBAL_AVERAGING 0
+
 // Declare global SBUSHandler instance from main.cpp
 extern SBUSHandler sbusHandler;
 
@@ -150,12 +157,17 @@ void MotorModeController::update() {
       xNorm = sbusHandler.normalizeSbus(sbusChannels[MOBILE_X_CHANNEL-1]); // CH1/X
       yNorm = sbusHandler.normalizeSbus(sbusChannels[MOBILE_Y_CHANNEL-1]); // CH2/Y
     }
-    if (channelsRead && 5 < SBUS_CHANNELS && 4 < SBUS_CHANNELS &&
-        sbusChannels[5] >= SBUS_MIN && sbusChannels[5] <= SBUS_MAX &&
-        sbusChannels[4] >= SBUS_MIN && sbusChannels[4] <= SBUS_MAX) {
-      xNormLeft = sbusHandler.normalizeSbus(sbusChannels[4]); // CH5/Y (roll)
-      yNormLeft = sbusHandler.normalizeSbus(sbusChannels[5]); // CH6/X (pitch)
+#if ENABLE_DUAL_GIMBAL_AVERAGING
+    // LEGACY CODE: Read CH5/CH6 for dual-gimbal averaging
+    // NOTE: CH5/CH6 are currently assigned to TD R6 Body Expansion in system channel map
+    // This creates conflict and cuts control range to 50% when CH5/CH6 are centered
+    if (channelsRead && DUAL_GIMBAL_Y_CHANNEL-1 < SBUS_CHANNELS && DUAL_GIMBAL_X_CHANNEL-1 < SBUS_CHANNELS &&
+        sbusChannels[DUAL_GIMBAL_Y_CHANNEL-1] >= SBUS_MIN && sbusChannels[DUAL_GIMBAL_Y_CHANNEL-1] <= SBUS_MAX &&
+        sbusChannels[DUAL_GIMBAL_X_CHANNEL-1] >= SBUS_MIN && sbusChannels[DUAL_GIMBAL_X_CHANNEL-1] <= SBUS_MAX) {
+      xNormLeft = sbusHandler.normalizeSbus(sbusChannels[DUAL_GIMBAL_X_CHANNEL-1]); // CH5 (roll)
+      yNormLeft = sbusHandler.normalizeSbus(sbusChannels[DUAL_GIMBAL_Y_CHANNEL-1]); // CH6 (pitch)
     }
+#endif
     if (channelsRead && FOOTLIFT_HEIGHT_CHANNEL-1 < SBUS_CHANNELS &&
         sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] >= SBUS_MIN && sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1] <= SBUS_MAX) {
       footLiftNorm = sbusHandler.normalizeSbus(sbusChannels[FOOTLIFT_HEIGHT_CHANNEL-1]);
@@ -164,9 +176,11 @@ void MotorModeController::update() {
     if (!channelsRead || MOBILE_X_CHANNEL-1 >= SBUS_CHANNELS || MOBILE_Y_CHANNEL-1 >= SBUS_CHANNELS) {
       Serial.println("SBUS read failed or invalid MOBILE channels, using xNorm=0, yNorm=0");
     }
-    if (!channelsRead || 5 >= SBUS_CHANNELS || 4 >= SBUS_CHANNELS) {
-      Serial.println("SBUS read failed or invalid Left Gimbal channels, using xNormLeft=0, yNormLeft=0");
+#if ENABLE_DUAL_GIMBAL_AVERAGING
+    if (!channelsRead || DUAL_GIMBAL_Y_CHANNEL-1 >= SBUS_CHANNELS || DUAL_GIMBAL_X_CHANNEL-1 >= SBUS_CHANNELS) {
+      Serial.println("SBUS read failed or invalid Dual Gimbal channels, using xNormLeft=0, yNormLeft=0");
     }
+#endif
     if (!channelsRead || FOOTLIFT_HEIGHT_CHANNEL-1 >= SBUS_CHANNELS) {
       Serial.println("SBUS read failed or invalid FootLift channel, using footLiftNorm=0");
     }
@@ -267,8 +281,15 @@ void MotorModeController::update() {
 
       int32_t centerPos = (motorController.getMinPos(i) + motorController.getMaxPos(i)) / 2;
       int32_t range = motorController.getMaxPos(i) - motorController.getMinPos(i);
-      float pitchDelta = (yNorm + yNormLeft) * 0.5f; // Forward/aft (CH2/Y + CH6/X)
-      float rollDelta = (i == 0 || i == 2) ? -(xNorm + xNormLeft) * 0.5f : -(-(xNorm + xNormLeft) * 0.5f); // Left/right (CH1/X + CH5/Y)
+#if ENABLE_DUAL_GIMBAL_AVERAGING
+      // DUAL-GIMBAL MODE: Average CH13/CH14 with CH5/CH6 (50/50 blend)
+      float pitchDelta = (yNorm + yNormLeft) * 0.5f; // Forward/aft (CH14 + CH6)
+      float rollDelta = (i == 0 || i == 2) ? -(xNorm + xNormLeft) * 0.5f : -(-(xNorm + xNormLeft) * 0.5f); // Left/right (CH13 + CH5)
+#else
+      // SINGLE-GIMBAL MODE: Use only CH13/CH14 (full range, same as STATIC mode)
+      float pitchDelta = yNorm; // Forward/aft (CH14 only)
+      float rollDelta = (i == 0 || i == 2) ? -xNorm : xNorm; // Left/right (CH13 only)
+#endif
       newPositions[i] = centerPos + (int32_t)((pitchDelta + rollDelta) * range / 2.0f * (motorController.getUpIsPositive(i) ? (i == 2 || i == 3 ? -1 : 1) : (i == 2 || i == 3 ? 1 : -1))) +
                         (int32_t)((-footLiftNorm) * range / 2.0f * (motorController.getUpIsPositive(i) ? 1 : -1));
       newPositions[i] = constrain(newPositions[i], motorController.getMinPos(i), motorController.getMaxPos(i));

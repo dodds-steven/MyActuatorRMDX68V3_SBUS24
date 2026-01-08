@@ -41,8 +41,14 @@ const float MOTOR4_MAX = 115.00;  // Motor 4 RobotHigh
 #define STATIC_Y_CHANNEL 14        // CH14/Y (index 13): Controls pitch (Motor2/Motor4) in STATIC mode
 #define MOBILE_X_CHANNEL 13        // CH13/X (index 12): Controls roll (Motor1/Motor3) in MOBILE mode
 #define MOBILE_Y_CHANNEL 14        // CH14/Y (index 13): Controls pitch (Motor2/Motor4) in MOBILE mode
-                                   // STRAFE_X_CHANNEL ****** could be 17-19 uncertan at the moment, i selected 17
-#define STRAFE_X_CHANNEL 17        // CH17/X (index 16): Controls lateral movement (strafe) in applicable modes
 #define FOOTLIFT_HEIGHT_CHANNEL 16 // CH16 (index 15): Controls foot lift height in MOBILE mode
+
+// if dual gimbal averaging is enabled, these channels are used
+#define DUAL_GIMBAL_X_CHANNEL 5    // CH5 (index 4): LEGACY - Left gimbal roll (DISABLED, conflicts with TD R6 Body Expansion. Tim used both sticks in drive for leaning?)
+#define DUAL_GIMBAL_Y_CHANNEL 6    // CH6 (index 5): LEGACY - Left gimbal pitch (DISABLED, conflicts with TD R6 Body Expansion Tim used both sticks in drive for leaning?)
+
+// the following channel is defined but not used in this code, unsure what the purpose was when Tim added the #define
+// #define STRAFE_X_CHANNEL 17        // CH17/X (index 16)
+
 
 #endif

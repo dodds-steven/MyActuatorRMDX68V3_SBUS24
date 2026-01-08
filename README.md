@@ -60,51 +60,53 @@ The `Definitions.h` file (`src/Definitions.h`) configures the SBUS channels for 
 
 ```cpp
 // SBUS channel definitions
-#define CONTROL_MODE 3            // CH3 (index 2): Selects operating mode (STATIC, MOBILE, SHUTDOWN)
-#define STATIC_X_CHANNEL 11       // CH11/X (index 10): Controls roll (Motor1/Motor3) in STATIC mode
-#define STATIC_Y_CHANNEL 10       // CH10/Y (index 9): Controls pitch (Motor2/Motor4) in STATIC mode
-#define MOBILE_X_CHANNEL 11       // CH11/X (index 10): Controls roll (Motor1/Motor3) in MOBILE mode
-#define MOBILE_Y_CHANNEL 10       // CH10/Y (index 9): Controls pitch (Motor2/Motor4) in MOBILE mode
-#define STRAFE_X_CHANNEL 1       // CH1/X (index 0): Controls lateral movement (strafe) in MOBILE mode
-#define FOOTLIFT_HEIGHT_CHANNEL 18 // CH18 (index 17): Controls footlift height in MOBILE mode
+#define CONTROL_MODE 15            // CH15 (index 14): Selects operating mode (STATIC, MOBILE, SHUTDOWN)
+#define STATIC_X_CHANNEL 13        // CH13/X (index 12): Controls roll (Motor1/Motor3) in STATIC mode
+#define STATIC_Y_CHANNEL 14        // CH14/Y (index 13): Controls pitch (Motor2/Motor4) in STATIC mode
+#define MOBILE_X_CHANNEL 13        // CH13/X (index 12): Controls roll (Motor1/Motor3) in MOBILE mode
+#define MOBILE_Y_CHANNEL 14        // CH14/Y (index 13): Controls pitch (Motor2/Motor4) in MOBILE mode
+#define DUAL_GIMBAL_X_CHANNEL 5    // CH5 (index 4): LEGACY - Left gimbal roll (DISABLED by default)
+#define DUAL_GIMBAL_Y_CHANNEL 6    // CH6 (index 5): LEGACY - Left gimbal pitch (DISABLED by default)
+#define FOOTLIFT_HEIGHT_CHANNEL 16 // CH16 (index 15): Controls foot lift height in MOBILE mode
 ```
 
 #### Channel Descriptions
 
-- **CH3 (CONTROL_MODE, index 2)**: Selects the operating mode:
+- **CH15 (CONTROL_MODE, index 14)**: Selects the operating mode:
   - `< 500`: `STATIC` mode (stationary, gimbal-controlled pitch/roll).
-  - `500–1300`: `MOBILE` mode (movement with strafe and gimbal control).
+  - `500–1300`: `MOBILE` mode (movement with gimbal control and height adjustment).
   - `> 1300`: `SHUTDOWN` mode (motors to RobotLow: Motor1/Motor3 to -5.00°, Motor2/Motor4 to 5.00°, then powered off).
-- **STATIC Mode (CH10/Y, CH11/X)**:
-  - **CH11/X (STATIC_X_CHANNEL, index 10)**: Controls roll (left/right tilt):
+- **STATIC Mode (CH13/X, CH14/Y)**:
+  - **CH13/X (STATIC_X_CHANNEL, index 12)**: Controls roll (left/right tilt):
     - Left (`~172`): Motor1/Motor4 to RobotHigh (~-109.50°/109.50°), Motor2/Motor3 to RobotLow (~10.50°/-10.50°).
     - Right (`~1811`): Motor1/Motor4 to RobotLow (~-10.50°/10.50°), Motor2/Motor3 to RobotHigh (~109.50°/-109.50°).
-  - **CH10/Y (STATIC_Y_CHANNEL, index 9)**: Controls pitch (forward/aft tilt):
+  - **CH14/Y (STATIC_Y_CHANNEL, index 13)**: Controls pitch (forward/aft tilt):
     - Forward (`~172`): Motor1/Motor3 to RobotLow (~-10.50°), Motor2/Motor4 to RobotLow (~10.50°).
     - Aft (`~1811`): Motor1/Motor3 to RobotHigh (~-109.50°), Motor2/Motor4 to RobotHigh (~109.50°).
   - Scaling: 0.9 (90% of full range).
-- **MOBILE Mode (CH10/Y, CH11/X, CH1/X, CH5/Y, CH6/X)**:
-  - **CH11/X (MOBILE_X_CHANNEL, index 10)**: Controls roll (left/right tilt, same as STATIC).
-  - **CH10/Y (MOBILE_Y_CHANNEL, index 9)**: Controls pitch (forward/aft tilt, same as STATIC).
-  - **CH1/X (STRAFE_X_CHANNEL, index 0)**: Controls lateral movement (strafe, roll):
-    - Left (`~172`): Motor1/Motor4 to RobotHigh (~-92.50°/87.50°), Motor2/Motor3 to RobotLow (~27.50°/-27.50°).
-    - Right (`~1811`): Motor1/Motor4 to RobotLow (~-27.50°/27.50°), Motor2/Motor3 to RobotHigh (~87.50°/-92.50°).
-  - **CH5/Y (index 4)**: Additional roll control.
-  - **CH6/X (index 5)**: Additional pitch control.
-  - Scaling: 0.5 (50% of full range, blended with CH5/CH6).
-- **CH18 (FOOTLIFT_HEIGHT_CHANNEL, index 17)**: Controls height in MOBILE mode:
+- **MOBILE Mode (CH13/X, CH14/Y, CH16)**:
+  - **CH13/X (MOBILE_X_CHANNEL, index 12)**: Controls roll (left/right tilt, same as STATIC).
+  - **CH14/Y (MOBILE_Y_CHANNEL, index 13)**: Controls pitch (forward/aft tilt, same as STATIC).
+  - Scaling: Full range (1.0) when dual-gimbal averaging is disabled.
+- **CH16 (FOOTLIFT_HEIGHT_CHANNEL, index 15)**: Controls height in MOBILE mode:
   - Low (`~172`): All motors to RobotHigh (Motor1/Motor3: -115.00°, Motor2/Motor4: 115.00°).
   - Mid (`~992`): All motors to center (Motor1/Motor3: -60.00°, Motor2/Motor4: 60.00°).
   - High (`~1811`): All motors to RobotLow (Motor1/Motor3: -5.00°, Motor2/Motor4: 5.00°).
 
+**Legacy Dual-Gimbal Feature (DISABLED by default)**:
+- **CH5 (DUAL_GIMBAL_X_CHANNEL)**: Left gimbal roll control (conflicts with TD R6 Body Expansion).
+- **CH6 (DUAL_GIMBAL_Y_CHANNEL)**: Left gimbal pitch control (conflicts with TD R6 Body Expansion).
+- Feature controlled via `ENABLE_DUAL_GIMBAL_AVERAGING` flag in MotorModeController.cpp (set to 0 by default).
+- Original intent: Average two gimbals for combined body position + compensation control.
+- Current issue: Channels conflict with TD R6 assignment; averaging with centered servos cuts control range to 50%.
+
 ### Gimbal Setup
 
 - **Transmitter Configuration**:
-  - Assign CH3 to a three-position switch for mode selection (STATIC, MOBILE, SHUTDOWN).
-  - Map CH11/X and CH10/Y to the right gimbal for roll and pitch control in both STATIC and MOBILE modes.
-  - Map CH1/X to the right gimbal’s X-axis for strafe (roll) in MOBILE mode.
-  - Map CH5/Y and CH6/X to the left gimbal for additional roll and pitch in MOBILE mode.
-  - Assign CH18 to a spring-loaded slider for footlift height, centered at ~992.
+  - Assign CH15 to a three-position switch for mode selection (STATIC, MOBILE, SHUTDOWN).
+  - Map CH13/X and CH14/Y to the right gimbal for roll and pitch control in both STATIC and MOBILE modes.
+  - Assign CH16 to a spring-loaded slider for footlift height, centered at ~992.
+  - (Optional) CH5/CH6 for dual-gimbal feature if enabled (disabled by default due to channel conflicts).
 - **Calibration**:
   - Ensure SBUS receiver outputs values between 172 and 1811.
   - Calibrate transmitter to center gimbals at ~992 for neutral position.
@@ -113,11 +115,11 @@ The `Definitions.h` file (`src/Definitions.h`) configures the SBUS channels for 
 ### Testing
 
 1. **Power On**:
-   - Start in `STATIC` mode (`CH3 < 500`) and droid will rise to mid level.
+   - Start in `STATIC` mode (`CH15 < 500`) and droid will rise to mid level.
 2. **STATIC Mode**:
-   - Set `CH3 < 500`, test CH11/X and CH10/Y for roll and pitch.
+   - Set `CH15 < 500`, test CH13/X and CH14/Y for roll and pitch.
 3. **MOBILE Mode**:
-   - Set `CH3 ≈ 992`, test CH1/X (strafe), CH10/Y, CH11/X, for tilt and roll and CH18 slider for height.
+   - Set `CH15 ≈ 992`, test CH13/X and CH14/Y for tilt and roll, and CH16 slider for height.
 4. **Serial Monitoring**:
    - Check logs for SBUS reads, mode switches, and motor positions.
    - Ensure `Update time` < 100ms and no “setPosition failed” errors.
